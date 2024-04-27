@@ -3,7 +3,7 @@
 SC_MODULE(alu){
     sc_in <sc_int<4>>opcode;
     sc_in <sc_int<32>>first_value,second_value;
-    sc_out <sc_int<32>>output_value;
+    sc_out <int>output_value;
     sc_out <bool> zero, negative;
     sc_int<32> internDataA, internDataB, internResult;
     
