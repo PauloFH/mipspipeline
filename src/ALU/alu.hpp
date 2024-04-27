@@ -1,5 +1,7 @@
 #include <systemc.h>
 
+
+
 SC_MODULE(alu){
     sc_in <sc_int<4>> opcode;
     sc_in <sc_int<32>> first_value,second_value;

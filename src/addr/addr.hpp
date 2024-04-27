@@ -1,5 +1,6 @@
 #include <systemc.h>
 
+
 SC_MODULE(addr){
     sc_in <int> first_value,second_value;
     sc_out <int> output_value;
