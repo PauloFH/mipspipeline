@@ -1,36 +1,28 @@
 #include <systemc.h>
 
 SC_MODULE(ProgramCounter) {
-    sc_in<bool> clk; // Sinal de clock
-    sc_in<bool> reset; // Sinal de reset (opcional)
-    sc_out<int> pc; // Saída: valor atual do Program Counter (PC)
+    sc_in<bool> clock; 
+    sc_in<int> pcInput;
+    sc_in<bool> reset,  enable, load;
+    sc_out<int> pcOutput;
+    int currentInstruction;
 
-    int current_address; // Endereço atual do Program Counter
-
-    // Construtor do módulo
-    SC_CTOR(ProgramCounter) {
-        current_address = 0; // Inicializa o Program Counter com zero
-
-        // Processo sensível ao flanco de subida do clock
-        SC_METHOD(incrementPC);
-        sensitive << clk.pos();
-
-        // Processo sensível ao sinal de reset
-        if (reset) {
-            SC_METHOD(resetPC);
-            sensitive << reset;
+    void counterIntruction() {
+        if(reset.read()){
+            currentInstruction = 0;
+            pcOutput.write(currentInstruction);
+        }else if(enable.read()){
+            currentInstruction += 1;
+            pcOutput.write(currentInstruction);
+        }else if(load.read()){
+            currentInstruction = pcInput.read();
+            pcOutput.write(currentInstruction);
         }
     }
-
-    // Método para incrementar o Program Counter no flanco de subida do clock
-    void incrementPC() {
-        current_address++; // Incrementa o Program Counter
-        pc.write(current_address); // Escreve o valor atual do PC na saída
-    }
-
-    // Método para resetar o Program Counter quando o sinal de reset for ativado
-    void resetPC() {
-        current_address = 0; // Reinicia o Program Counter para zero
-        pc.write(current_address); // Escreve o valor atual do PC na saída após o reset
+    
+    SC_CTOR(ProgramCounter) {
+       currentInstruction = 0; 
+        SC_METHOD(counterIntruction);
+        sensitive << clock.pos() << reset;
     }
 };

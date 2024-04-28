@@ -1,29 +1,26 @@
 #include <systemc.h>
 
-#define MEMORY_SIZE 1024 // Tamanho da memória de instruções (em número de palavras)
+#define MEMORY_SIZE 512
 
 SC_MODULE(InstructionMemory) {
-    sc_in<bool> clk; // Sinal de clock
-    sc_in<int> pc; // Program Counter (PC)
-    sc_out<int> instruction; // Saída: instrução buscada
+    sc_in<bool> clk; 
+    sc_in<bool> enable;
+    sc_in<int> pc; 
+    sc_out<int> instruction; 
 
-    int memory[MEMORY_SIZE]; // Memória de instruções (simulada como um array de inteiros)
+    int memory[MEMORY_SIZE];
 
-    // Construtor do módulo
-    SC_CTOR(InstructionMemory) {
-        // Inicializa a memória de instruções com valores fictícios (para fins de exemplo)
-        for (int i = 0; i < MEMORY_SIZE; ++i) {
-            memory[i] = rand() % 256; // Preenche a memória com valores aleatórios (instruções de 8 bits)
-        }
-
-        // Processo sensível ao flanco de subida do clock
-        SC_METHOD(fetchInstruction);
-        sensitive << clk.pos();
+    void fetchInstruction() {
+        int addr = pc.read();
+        instruction.write(memory[addr]);
     }
 
-    // Método para buscar a instrução da memória de instruções com base no PC atual
-    void fetchInstruction() {
-        int addr = pc.read(); // Obtém o valor atual do PC
-        instruction.write(memory[addr]); // Lê a instrução da memória de instruções
+        SC_CTOR(InstructionMemory) {
+        for (int i = 0; i < MEMORY_SIZE; ++i) {
+            memory[i] = rand() % 256;
+        }
+
+        SC_METHOD(fetchInstruction);
+        sensitive << clk.pos();
     }
 };

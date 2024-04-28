@@ -1,32 +1,68 @@
 #include <systemc.h>
-#include <alu.hpp>
+#include <ProgramCounter.hpp>
 
 
 
-int sc_main(int argc, char* argv[]) {
-	sc_signal<sc_int<32>> first_value;
-	sc_signal<sc_int<32>> second_value;
-	sc_signal <sc_int<4>>opcode;
- 	sc_signal <sc_int<32>>output_value;
-    sc_signal <bool> zero, negative;
-	alu alu("alu");
-	alu.first_value(first_value);
-	alu.second_value(second_value);
-	alu.opcode(opcode);
-	alu.output_value(output_value);
-	alu.zero(zero);
-	alu.negative(negative);
+int sc_main(int arg, char* argv[]) {
+	
+	sc_signal<bool> clock;
+	sc_signal<bool> enable;
+	sc_signal<bool> reset;
+	sc_signal<bool> load;
+	sc_signal<int> cinp;
+	sc_signal<int> coutp;
+	ProgramCounter pc("PC");
+	pc.clock(clock);
+	pc.enable(enable);
+	pc.reset(reset);
+	pc.pcOutput(coutp);
+	pc.load(load);
+	pc.pcInput(cinp);
+	sc_trace_file *wf = sc_create_vcd_trace_file("PC");
+	sc_trace(wf,clock,"clock");
+	sc_trace(wf,enable,"enable");
+	sc_trace(wf,reset,"reset");
+	sc_trace(wf,load,"load");
+	sc_trace(wf,cinp,"cinp");
+	sc_trace(wf,coutp,"coutp");
 
-	first_value = 1;
-	second_value = 2;
-	opcode = 1;
+	reset = 0;
+	enable = 0;
 
-	sc_start();
+	cout << sc_time_stamp() << "reset 0\n" << endl;
+	for (int i = 0; i < 5; ++i) {
+		clock = 0;
+		sc_start(1, SC_NS);
+		clock = 1;
+		sc_start(1, SC_NS);
+	}
+	reset = 1;
+cout << sc_time_stamp() << "reset 1\n" << endl;
+	for (int i = 0; i < 10; ++i) {
+		clock = 0;
+		sc_start(1, SC_NS);
+		clock = 1;
+		sc_start(1, SC_NS);
+	}
 
-
-	cout << "resultado da operaction com opcode: " << opcode << " é: " << output_value << endl;
-	cout << "status de zero: " << zero << endl;
-	cout << "status de negative: " << negative << endl;
+	reset = 0;
+	cout << sc_time_stamp() << "reset zerado novamente\n" << endl;
+	for (int i = 0; i < 5; ++i) {
+		clock = 0;
+		sc_start(1, SC_NS);
+		clock = 1;
+		sc_start(1, SC_NS);
+	}
+cout << sc_time_stamp() << "enable 1\n" << endl;
+enable = 1;
+for (int i = 0; i < 256; ++i) {
+		clock = 0;
+		sc_start(1, SC_NS);
+		clock = 1;
+		sc_start(1, SC_NS);	
+	}
+	enable = 0;
+	sc_close_vcd_trace_file(wf);
 	return 0;
 }
 
