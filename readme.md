@@ -1,4 +1,69 @@
 #  MIPS-like em SystemC
+###  Descrição do Trabalho:
+ Implementar um modelo de processador (Parte de Controle/Parte Operativa)  "MIPS-like" o seguinte conjunto de instruções:
+AND —> operação booleana AND
+
+OR —> operação booleana OR
+
+XOR —> operação booleana XOR
+
+NOT —> operação booleana NOT
+
+CMP —> comparação
+
+ADD —> soma
+
+SUB —> subtração
+
+LD —> leitura em memória
+
+ST —> armazenamento em memória
+
+J —> salto incondicional
+
+JN —> salto condicional; salta se (N)egativo
+
+JZ —> salto condicional; salta se (Z)ero
+
+### Decisões de projeto:
+ Três modos de endereçamento de operandos (registrador, memória e imediato);
+
+### O trabalho consiste de:
+
+#### Implementação do modelo da arquitetura em linguagem para descrição de hardware (SystemC);
+
+#### Resultados de simulações da execução de instruções de pelo menos 3 algoritmos na arquitetura.
+
+#### análises de desempenho (ciclos de relógio necessários à execução das instruções) em função dos comportamentos do pipeline. Entende-se por comportamentos do pipeline, os tratamentos implementados para as dependências de dados e de controle;
+
+ 
+
+### Apresentação dias 30/04 e 02/05 em sala de aula, exemplificando o funcionando do modelo de processador implementado. A apresentação deve mostrar:
+
+#### resultados de simulação (telas ou demonstração).
+
+ 
+
+### Entrega dia 30/04/24 via tarefa SIGAA.
+ 
+
+## Metodologia de Projeto:
+
+### 1. PARTE OPERATIVA
+
+Implementar os componentes individualmente e testá-los individualmente.
+
+ULA, Banco de Registradores, Memória de Dados, Memória de Instruções, Somador, PC, buffers
+
+### 2. PARTE DE CONTROLE
+
+Implementar o Controle através de Máquina de Estados e testar individualmente
+
+### 3. INTEGRAÇÃO
+
+Integrar a Parte Operativa com a Parte de Controle
+
+
 
 ## projeto criado usando Visual Studio Code Template for SystemC
 - Creditos do template usado: https://github.com/fmuller-pns/systemc-vscode-project-template.git
