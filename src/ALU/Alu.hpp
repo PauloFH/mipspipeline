@@ -8,7 +8,7 @@ SC_MODULE(alu){
     sc_out <sc_int<32>> output_value;
     sc_out <bool> zero, negative;
     sc_int<32> internDataA, internDataB, internResult;
-    
+
     void aluOperation(){
         zero = false;
 		negative = false;

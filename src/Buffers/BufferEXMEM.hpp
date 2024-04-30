@@ -1,18 +1,20 @@
 #include <systemc.h>
 
 SC_MODULE(BufferEXMEM) {
-    sc_in<bool> clk;
-    sc_in<T> inputData;
+  sc_in<bool> clk;
+    sc_in<int> aluData;
+    sc_in<int> ReadData;
+    sc_in<int> addData;
+    sc_in<int>muxData;
     sc_in<bool> inM;
     sc_in<bool> inWB;
-    sc_in<bool> inEX;
-    sc_out<bool> outEx;
     sc_out<bool> outM;
     sc_out<bool> outWB;
-    sc_out<T> outputData;
-
-    T storedData;
-    bool storedControlSignal;
+    sc_out<int> outputData1;
+     sc_out<int> outputData2; 
+    int storedData1,storedData2;
+    bool internalM, internalWB;
+    int storedData;
 
     void bufferProcess() {
         while (true) {

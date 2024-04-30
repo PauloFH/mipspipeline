@@ -3,16 +3,15 @@
 
 SC_MODULE(BufferMEMWB) {
     sc_in<bool> clk;
-    sc_in<T> inputData;
+    sc_in<int> ReadData, addrss, muxData;
     sc_in<bool> inM;
     sc_in<bool> inWB;
-    sc_in<bool> inEX;
     sc_out<bool> outEx;
     sc_out<bool> outM;
     sc_out<bool> outWB;
-    sc_out<T> outputData;
+    sc_out<int> outputData;
 
-    T storedData;
+    int storedData;
     bool storedControlSignal;
 
     void bufferProcess() {
