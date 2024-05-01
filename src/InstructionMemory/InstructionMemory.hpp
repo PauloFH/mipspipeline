@@ -131,7 +131,6 @@ sc_uint<9> registradorToBinary(sc_uint<4> opcd, string reg, int tp){
     if(opcd == 0b0100){
             if(tp == 1 | tp == 2){
                 sc_uint<9> regIntern = 0b000000000;
-                reg.copy(,,);
             }else{
                     return 0b0000000000000000;
             }
