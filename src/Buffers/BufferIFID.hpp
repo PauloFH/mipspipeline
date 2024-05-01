@@ -11,10 +11,10 @@ SC_MODULE(BufferIFID) {
     void bufferProcess() {
         while (true) {
             wait(); 
-         if(enable.read()){
-            storedData = inputData.read();
-            outputData.write(storedData);
-         }
+            if(enable.read()) {
+                storedData = inputData.read();
+                outputData.write(storedData);
+            }
         }
     }
 
