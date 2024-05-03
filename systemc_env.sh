@@ -4,7 +4,7 @@ export SYSTEMC_PATH=~/systemc/systemc
 export SYSTEMC_LIB_PATH=$SYSTEMC_PATH/lib-linux64
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SYSTEMC_LIB_PATH
 
-# clone systemc-vscode-project-template.git project 
+
 systemc-new-project() {
 if [ -z "$1" ]; then 
   echo "Error: add the name of the project" >&2
