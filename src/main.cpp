@@ -3,19 +3,16 @@
 int sc_main(int arg, char* argv[]) {
 ;
 	InstructionMemory IM("IM");
-	
+
 	sc_signal<bool> clock;
 	sc_signal<bool> enableIM;
 	sc_signal<bool> writeIM;
-	
-	sc_signal<bool> enablePC;
-	sc_signal<bool> resetPC;
-	sc_signal<bool> loadPC;
-	sc_signal<int> pcInputAdr;
-	sc_signal<int>  pcOutputAdr;
+	sc_signal<sc_uint<9>> addressIM;
+	sc_signal<sc_uint<32>> instruction;
 	IM.clk(clock);
 	IM.enable(enableIM);
 	IM.write(writeIM);
+	IM.instruction(instruction);
 	
 	/*
 	sc_trace_file *wf = sc_create_vcd_trace_file("PC");

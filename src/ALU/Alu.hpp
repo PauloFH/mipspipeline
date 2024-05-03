@@ -43,10 +43,11 @@ SC_MODULE(alu){
 							negative = false;
 					break;
 				case 6:
+				case 7:
 					internResult = internDataA + internDataB;
 					output_value.write(internResult);
 					break;
-				case 7:
+				case 8:
 					internResult = internDataA - internDataB;
 					output_value.write(internResult);
 					break;

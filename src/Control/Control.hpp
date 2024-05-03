@@ -2,10 +2,11 @@
 
 SC_MODULE(Control) {
     sc_in<bool> clk;
-    sc_in<int> opcode;
-    sc_in<int> op1;
-    sc_in<int> op2;
-    sc_in<int> opd;
+    sc_in<sc_uint<32>> instr;
+     sc_uint<4> opcode;
+     sc_uint<4> op1;
+     sc_uint<4> op2;
+     sc_uint<4> opd;
     sc_in <bool> zero;
     sc_in <bool> negative;
     sc_in <bool> reset;
@@ -37,10 +38,8 @@ SC_MODULE(Control) {
 
     sc_out<bool> RBW;
     sc_out<bool> DM;
-
     int state = 0;
     bool restart;
-
     void ID(){
         imEnable.write(true);
         imWrite.write(false);
@@ -82,7 +81,7 @@ SC_MODULE(Control) {
             break;
         case 4: 
             IR();
-            if(opcode.read() == 7){// LD
+            if(opcode == 7){// LD
                 regEnable.write(true);
                 regWrite.write(true);
                 dmEnable.write(true);
@@ -161,6 +160,6 @@ SC_MODULE(Control) {
 
     SC_CTOR(Control) {
         SC_METHOD(updateState);
-        sensitive << clk.pos() << reset << opcode;
+        sensitive << clk.pos() << reset;
     }
 };

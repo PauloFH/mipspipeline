@@ -1,6 +1,6 @@
 #include <systemc.h>
 
-#define MEMORY_SIZE 512
+#define MEMORY_SIZE 4096
 
 SC_MODULE(DataMemory) {
     sc_in<bool> clk; 
