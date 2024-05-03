@@ -1,23 +1,24 @@
 #include <systemc.h>
 
 #define NUM_REGISTERS 32
+#define RAND_MAX 255
 
 SC_MODULE(Registers) {
     sc_in<bool> clk; 
     sc_in<bool> RegWrite; 
-    sc_in<int> writeRegister;
-    sc_in<int> writeData; 
-    sc_in<int> readRegister1; 
-    sc_in<int> readRegister2;
-    sc_out<int> readData1;
-    sc_out<int> readData2;
+    sc_in<sc_uint<6>>  writeRegister;
+    sc_in<sc_uint<32>> writeData; 
+    sc_in<sc_uint<6>>  readRegister1; 
+    sc_in<sc_uint<6>>  readRegister2;
+    sc_out<sc_int<32>> readData1;
+    sc_out<sc_int<32>> readData2;
 
-    int registers[NUM_REGISTERS];
+    sc_int<32> registers[NUM_REGISTERS];
 
     
     void writeRegistrator() {
         if (RegWrite.read() == true) {
-            registers[RegWrite.read()] = writeData.read();
+            registers[writeRegister.read()] = writeData.read();
         }
     }
 
@@ -30,8 +31,9 @@ SC_MODULE(Registers) {
    
     SC_CTOR(Registers) {
     
-        for (int i = 0; i < NUM_REGISTERS; ++i) {
-            registers[i] = 0;
+        for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i) {
+          
+            registers[i] = rand();
         }
 
        

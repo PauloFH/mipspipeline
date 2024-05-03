@@ -6,9 +6,9 @@ SC_MODULE(DataMemory) {
     sc_in<bool> clk; 
     sc_in<bool> memWrite; 
     sc_in<bool> enable; 
-    sc_in<int> write_data; 
-    sc_in<int> address; 
-    sc_out<int> readData; 
+    sc_in<sc_int<32>> write_data; 
+    sc_in<sc_int<9>> address; 
+    sc_out<sc_int<32>> readData; 
 
     int memory[MEMORY_SIZE];
     

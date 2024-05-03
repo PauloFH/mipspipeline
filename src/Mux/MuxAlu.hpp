@@ -2,9 +2,9 @@
 
 SC_MODULE(Multiplexer) {
     sc_in<bool> sel; 
-    sc_in<int> in0; 
-    sc_in<int> in1; 
-    sc_out<int> out; 
+    sc_in<sc_int<32>> in0; 
+    sc_in<sc_int<32>> in1; 
+    sc_out<sc_int<32>> out; 
 
     void process() {
         if (sel.read() == 0) {

@@ -1,11 +1,11 @@
 #include <systemc.h>
 
 SC_MODULE(ProgramCounter) {
-    sc_in<bool> clock; 
-    sc_in<int> pcInput;
+    sc_in<bool> clk; 
+    sc_in<sc_uint<9>> pcInput;
     sc_in<bool> reset,  enable, load;
-    sc_out<int> pcOutput;
-    int currentInstruction;
+    sc_out<sc_uint<9>> pcOutput;
+    sc_uint<9> currentInstruction;
 
     void counterIntruction() {
         if(reset.read()){
@@ -23,6 +23,6 @@ SC_MODULE(ProgramCounter) {
     SC_CTOR(ProgramCounter) {
        currentInstruction = 0; 
         SC_METHOD(counterIntruction);
-        sensitive << clock.pos() << reset;
+        sensitive << clk.pos() << reset;
     }
 };

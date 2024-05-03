@@ -90,18 +90,18 @@ SC_MODULE(Control) {
                 DM.write(true);
                 state = 6;
                 
-            }else if(opcode.read()== 8){// ST
+            }else if(opcode== 8){// ST
                 dmEnable.write(true);
                 dmWrite.write(false);
                 RBW.write(true);
                 state = 7;
-            }else if(opcode.read() == 9){//J
+            }else if(opcode == 9){//J
                 pcEnable.write(false);
                 pcLoad.write(true);
                 pcjump.write(opd);
                 restart = true;
                 state = 8;
-            }else if(opcode.read() == 10){//JN
+            }else if(opcode == 10){//JN
                 if(negative.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
@@ -110,7 +110,7 @@ SC_MODULE(Control) {
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode.read() == 11){//JZ
+            }else if(opcode == 11){//JZ
                 if(zero.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
@@ -119,7 +119,7 @@ SC_MODULE(Control) {
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode.read() > 0  && opcode.read() < 7){//ALU
+            }else if(opcode > 0  && opcode< 7){//ALU
                 RBW.write(false);
                 regEnable.write(true);
                 regWrite.write(false);
