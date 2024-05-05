@@ -1,6 +1,6 @@
 #include <systemc.h>
 
-SC_MODULE(Multiplexer) {
+SC_MODULE(MuxAlu) {
     sc_in<bool> aluSRC; 
     sc_in<sc_int<32>> in0; 
     sc_in<sc_int<32>> in1; 
@@ -14,7 +14,7 @@ SC_MODULE(Multiplexer) {
         }
     }
 
-    SC_CTOR(Multiplexer) {
+    SC_CTOR(MuxAlu) {
         SC_METHOD(process);
         sensitive << aluSRC << in0 << in1;
     }

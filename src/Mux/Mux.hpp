@@ -1,6 +1,6 @@
 #include <systemc.h>
 
-SC_MODULE(Multiplexer) {
+SC_MODULE(Mux) {
     sc_in<bool> pcSRC; 
     sc_in<sc_uint<9>> in0; 
     sc_in<sc_uint<9>> in1; 
@@ -14,7 +14,7 @@ SC_MODULE(Multiplexer) {
         }
     }
 
-    SC_CTOR(Multiplexer) {
+    SC_CTOR(Mux) {
         SC_METHOD(process);
         sensitive << pcSRC << in0 << in1;
     }
