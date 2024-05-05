@@ -31,7 +31,7 @@ SC_MODULE(DataMemory) {
             memory[i] = 0;
         }
         SC_METHOD(memoryOperation);
-        sensitive << clk.pos();
+        sensitive << clk.value_changed();
     }
 
 };

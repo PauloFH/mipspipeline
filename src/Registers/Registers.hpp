@@ -7,7 +7,7 @@ SC_MODULE(Registers) {
     sc_in<bool> clk; 
     sc_in<bool> RegWrite; 
     sc_in<sc_uint<6>>  writeRegister;
-    sc_in<sc_uint<32>> writeData; 
+    sc_in<sc_int<32>> writeData; 
     sc_in<sc_uint<6>>  readRegister1; 
     sc_in<sc_uint<6>>  readRegister2;
     sc_out<sc_int<32>> readData1;
@@ -38,7 +38,7 @@ SC_MODULE(Registers) {
 
        
         SC_METHOD(writeRegistrator);
-        sensitive << clk.pos();
+        sensitive << clk.value_changed();
 
         
         SC_METHOD(readRegistrator);

@@ -1,45 +1,40 @@
 #include <systemc.h>
 
-SC_MODULE(Control) {
+SC_MODULE(Controller) {
     sc_in<bool> clk;
     sc_in<sc_uint<32>> instr;
-     sc_uint<4> opcode;
-     sc_uint<4> op1;
-     sc_uint<4> op2;
-     sc_uint<4> opd;
     sc_in <bool> zero;
     sc_in <bool> negative;
     sc_in <bool> reset;
-
     sc_out<bool> Branch;
     sc_out<bool> memRead;
     sc_out<bool> memToReg;
     sc_out<bool> memWrite;
     sc_out<bool> aluSrc;
-
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
     sc_out<bool> pcLoad;
     sc_out<int>  pcjump;
-    
     sc_out<bool> imEnable;
     sc_out<bool> ri;
     sc_out<bool> imWrite;
-    
     sc_out <bool> dmEnable;
     sc_out<bool> dmWrite;
-
     sc_out<bool> regWrite;
     sc_out<bool> regEnable;
     sc_out<bool> regDst;
-
     sc_out<bool> aluReset;
     sc_out<int>  aluOp;
-
     sc_out<bool> RBW;
     sc_out<bool> DM;
+
+    sc_uint<4> opcode;
+     sc_uint<4> op1;
+     sc_uint<4> op2;
+     sc_uint<4> opd;
     int state = 0;
     bool restart;
+    
     void ID(){
         imEnable.write(true);
         imWrite.write(false);
@@ -158,7 +153,7 @@ SC_MODULE(Control) {
         
     }
 
-    SC_CTOR(Control) {
+    SC_CTOR(Controller) {
         SC_METHOD(updateState);
         sensitive << clk.pos() << reset;
     }
