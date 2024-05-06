@@ -1,0 +1,30 @@
+
+#ifndef BUFFERIM_HPP
+#define BUFFERIM_HPP
+
+#include <systemc.h>
+
+SC_MODULE(BufferIM) {
+    sc_in<bool> clk;
+    sc_in<bool> reset;
+    sc_in<sc_uint<32>> instruction;
+    sc_out<sc_uint<32>> instruction_out;
+
+    sc_uint<32> buffer;
+
+    void process() {
+        if (reset.read()) {
+            buffer = 0;
+        } else {
+            buffer = instruction.read();
+        }
+        instruction_out.write(buffer);
+    }
+
+    SC_CTOR(BufferIM) {
+        SC_METHOD(process);
+        sensitive << clk.pos();
+    }
+};
+
+#endif // BUFFERIM_HPP

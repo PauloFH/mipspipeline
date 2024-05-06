@@ -7,9 +7,9 @@
 #include<AddA.hpp>
 #include<Addr.hpp>
 #include<Controller.hpp>
-#include<MuxAlu.hpp>
 #include<Mux.hpp>
 #include<MuxDM.hpp>
+#include<BufferIFID.hpp>
 
 int sc_main(int arg, char* argv[]) {
 
@@ -27,12 +27,12 @@ int sc_main(int arg, char* argv[]) {
 
 	Addr Addr("Addr");
 
-	MuxAlu MuxAlu("MuxAlu");
 
 	Mux Mux("Mux");
 
 	MuxDM MuxDM("MuxDM");
 
+	BufferIFID BufferIFID("BufferIFID");
 //-----------------------------------------------------------------------------------------------
 
 	sc_signal<bool>       clock; // Clock signal
@@ -48,24 +48,29 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool>       IM_enable;
 	sc_signal<bool>       IM_write;
 	//sc_signal<sc_uint<9>> PC_IM_address;
-	sc_signal<sc_uint<32>>IM_Buffer1_instructionIM;
+	sc_signal<sc_uint<32>>IM_BufferIFIM_instructionIM;
 
 	// Signals for Registers
 	sc_signal<bool>       RegistersData_Controller_RegWrite;
 	sc_signal<sc_uint<6>> RegistersData_MUX3_writeRegister;
 	sc_signal<sc_int<32>> RegistersData_MUX4_writeData;
-	sc_signal<sc_uint<6>> Buffer1_RegistersData_readRegister1;
-	sc_signal<sc_uint<6>> Buffer1_RegistersData_readRegister2;
+	sc_signal<sc_uint<6>> BufferIFIM_RegistersData_readRegister1;
+	sc_signal<sc_uint<6>> BufferIFIM_RegistersData_readRegister2;
 	sc_signal<sc_int<32>> RegistersData_Buffer2_readData1;
 	sc_signal<sc_int<32>> RegistersData_Buffer2_readData2;
+	sc_signal<sc_uint<4>> BufferIFID_RegistersData_opcode;
+	sc_signal<sc_int<16>> BufferIFID_RegistersData_immediate;
+	
+	sc_signal<sc_uint<4>> BufferIFID_RegistersData_opcode;
+	sc_signal<sc_int<16>> BufferIFID_RegistersData_immediate;
 
 	// Signals for ALU
-	sc_signal<bool>       Buffer3_ALU_zero;
-	sc_signal<bool>       Buffer3_ALU_negative;
+	sc_signal<bool>       ALU_Buffer3_zero;
+	sc_signal<bool>       ALU_Buffer3_negative;
 	sc_signal<sc_uint<4>> Controller_ALU_opcode;
-	sc_signal<sc_int<32>> ALU_Buffer2_ALU_input1;
-	sc_signal<sc_int<32>> ALU_Buffer1_ALU_input2;
-	sc_signal<sc_int<32>> Buffer3_ALU_result;
+	sc_signal<sc_int<32>> Buffer2_ALU_input1;
+	sc_signal<sc_int<32>> ALU_MuxDST_ALU_input2;
+	sc_signal<sc_int<32>> ALU_Buffer3_result;
 
 	// Signals for DataMemory
 	sc_signal<bool>       Buffer3_DM_enable;
@@ -81,14 +86,8 @@ int sc_main(int arg, char* argv[]) {
 
 	// Signals for Addr
 	sc_signal<sc_uint<9>> PC_Addr_input;
-	sc_signal<sc_uint<9>> Addr_Buffer1_output;
+	sc_signal<sc_uint<9>> Addr_BufferIFIM_output; // BufferIFID
 
-
-	// MuxAlu signals
-	sc_signal<bool>       Buffer2_MuxAlu_aluSRC;
-	sc_signal<sc_int<32>> Buffer2_MuxAlu_input0;
-	sc_signal<sc_int<32>> Buffer2_MuxAlu_input1;
-	sc_signal<sc_int<32>> MuxAlu_alu_output;
 
 	// MuxPC signals
 	sc_signal<bool>       Buffer3_Branch_MuxPC_pcSRC;
@@ -102,13 +101,21 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_int<32>> Buffer4_MuxDM_input1;
 	sc_signal<sc_int<32>> MuxDM_Alu_output;
 
+	//BufferIFID signals
+	sc_signal<bool>        BufferIFID_reset;
+	sc_signal<sc_uint<9>>  BufferIFID_BufferIDEX_address;
+	sc_signal<sc_uint<6>> BufferIFID_BufferIDEX_DestReg;
+
+
+	//Controller signals
+	sc_signal<sc_uint<32>> BufferIFID_Controller_instruction;
 //-----------------------------------------------------------------------------------------------
 
 	// Connecting the IM signals
 	IM.clk(clock);
 	IM.enable(IM_enable);
 	IM.write(IM_write);
-	IM.instruction(IM_Buffer1_instructionIM);
+	IM.instruction(IM_BufferIFIM_instructionIM);
 	IM.address(PC_IM_address);
 
 	// Connecting the PC signals
@@ -122,20 +129,22 @@ int sc_main(int arg, char* argv[]) {
 	// Connecting the Registers signals
 	RegistersData.clk(clock);
 	RegistersData.RegWrite(RegistersData_Controller_RegWrite);
+	RegistersData.opcode(BufferIFID_RegistersData_opcode);
 	RegistersData.writeRegister(RegistersData_MUX3_writeRegister);
 	RegistersData.writeData(RegistersData_MUX4_writeData);
-	RegistersData.readRegister1(Buffer1_RegistersData_readRegister1);
-	RegistersData.readRegister2(Buffer1_RegistersData_readRegister2);
+	RegistersData.readRegister1(BufferIFIM_RegistersData_readRegister1);
+	RegistersData.readRegister2(BufferIFIM_RegistersData_readRegister2);
+	RegistersData.immediate(BufferIFID_RegistersData_immediate);
 	RegistersData.readData1(RegistersData_Buffer2_readData1);
 	RegistersData.readData2(RegistersData_Buffer2_readData2);
 	
 	// Connecting the ALU signals
-	ALU.zero(Buffer3_ALU_zero);
-	ALU.negative(Buffer3_ALU_negative);
+	ALU.zero(ALU_Buffer3_zero);
+	ALU.negative(ALU_Buffer3_negative);
 	ALU.opcode(Controller_ALU_opcode);
-	ALU.first_value(ALU_Buffer2_ALU_input1);
-	ALU.second_value(ALU_Buffer1_ALU_input2);
-	ALU.output_value(Buffer3_ALU_result);
+	ALU.first_value(Buffer2_ALU_input1);
+	ALU.second_value(ALU_MuxDST_ALU_input2);
+	ALU.output_value(ALU_Buffer3_result);
 
 	// Connecting the DM signals
 	DM.clk(clock);
@@ -152,13 +161,7 @@ int sc_main(int arg, char* argv[]) {
 
 	// Connecting the Addr signals
 	Addr.first_value(PC_Addr_input);
-	Addr.output_value(Addr_Buffer1_output);
-
-	// Connecting the MuxAlu signals
-	MuxAlu.aluSRC(Buffer2_MuxAlu_aluSRC);
-	MuxAlu.in0(Buffer2_MuxAlu_input0);
-	MuxAlu.in1(Buffer2_MuxAlu_input1);
-	MuxAlu.out(MuxAlu_alu_output);
+	Addr.output_value(Addr_BufferIFIM_output);
 
 	// Connecting the MuxPC signals
 	Mux.pcSRC(Buffer3_Branch_MuxPC_pcSRC);
@@ -171,6 +174,21 @@ int sc_main(int arg, char* argv[]) {
 	MuxDM.in0(Buffer4_MuxDM_input0);
 	MuxDM.in1(Buffer4_MuxDM_input1);
 	MuxDM.out(MuxDM_Alu_output);
+
+	// Connecting the BufferIFID signals
+	BufferIFID.clk(clock);
+	BufferIFID.reset(BufferIFID_reset);
+	BufferIFID.instruction(IM_BufferIFIM_instructionIM);
+	BufferIFID.Address_Addr(Addr_BufferIFIM_output);
+	BufferIFID.Address_Addr_Out(BufferIFID_BufferIDEX_address);
+	BufferIFID.instruction_out(BufferIFID_Controller_instruction);
+	BufferIFID.readRegister1(BufferIFIM_RegistersData_readRegister1);
+	BufferIFID.readRegister2(BufferIFIM_RegistersData_readRegister2);
+	BufferIFID.opcode_out(BufferIFID_RegistersData_opcode);
+	BufferIFID.DestReg_out(BufferIFID_BufferIDEX_DestReg);
+	BufferIFID.immediate_out(BufferIFID_RegistersData_immediate);
+
+	
 
 	// Connecting the Controller signals
 

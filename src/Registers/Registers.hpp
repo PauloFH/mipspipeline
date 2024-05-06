@@ -5,14 +5,19 @@
 
 SC_MODULE(Registers) {
     sc_in<bool> clk; 
-    sc_in<bool> RegWrite; 
+    sc_in<bool> RegWrite;
+    sc_in<bool> enable;
+    sc_in<sc_uint<4>>  opcode; 
     sc_in<sc_uint<6>>  writeRegister;
-    sc_in<sc_int<32>> writeData; 
+    sc_in<sc_int<32>>  writeData; 
     sc_in<sc_uint<6>>  readRegister1; 
     sc_in<sc_uint<6>>  readRegister2;
+    sc_in<sc_int<16>>  immediate;
+
     sc_out<sc_int<32>> readData1;
     sc_out<sc_int<32>> readData2;
 
+    sc_int<32> Intern_immediate;
     sc_int<32> registers[NUM_REGISTERS];
 
     
@@ -25,7 +30,13 @@ SC_MODULE(Registers) {
     
     void readRegistrator() {
        readData1.write(registers[readRegister1.read()]);
-        readData2.write(registers[readRegister2.read()]);
+       if (opcode.read() == 0b0111){
+            Intern_immediate = immediate.read();
+            readData2.write(Intern_immediate);
+       }else{
+            readData2.write(registers[readRegister2.read()]);
+       }
+        
     }
 
    
@@ -33,7 +44,7 @@ SC_MODULE(Registers) {
     
         for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i) {
           
-            registers[i] = rand();
+            registers[i] = 0;
         }
 
        

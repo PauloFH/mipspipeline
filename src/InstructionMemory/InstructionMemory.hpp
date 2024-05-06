@@ -30,7 +30,7 @@ SC_MODULE(InstructionMemory)
 
 public:
     enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
-    map<string, sc_uint<6>> jumpLocations = {};
+    map<string, sc_uint<16>> jumpLocations = {};
     
     void convertAsmInInstructions(){
         jumpLocations = {};
@@ -66,10 +66,10 @@ public:
     if (file.is_open())
     {
         string line;
-        sc_uint<6> ct = 0b000000;
+        sc_uint<16> ct = 0b0000000000000000;
         while (getline(file, line))
         {   if(line.size()>= 1){
-            ct = ct + 0b000001;
+            ct = ct + 0b0000000000000001;
                 if(line.find(":")){
                 line.substr(0, line.size() -1);
                     jumpLocations.insert({line,ct});
@@ -112,6 +112,8 @@ public:
     if((opcodeValue == lw_op) | (opcodeValue == sw_op)){
     binaryValue.range(27, 22) =registradorToBinary(opcodeValue, opd,1); // Registrador destino
     binaryValue.range(21, 0) = registradorToBinary(opcodeValue, op1,2); // registrador + offset
+    }else if(opcodeValue == j_op){  
+    binaryValue.range(27, 0) = registradorToBinary(opcodeValue, opd,1); // Registrador destino
     }else{
     binaryValue.range(27, 22) =registradorToBinary(opcodeValue, opd,1); // Registrador destino
     binaryValue.range(21, 16) = registradorToBinary(opcodeValue, op1,2); // Registrador fonte 1
@@ -131,7 +133,7 @@ sc_uint<32> registradorToBinary(sc_uint<4> opcd, string reg, int tp){
         {"$s0", 0b010000}, {"$s1", 0b010001},{"$s3", 0b010011},{"$s4", 0b010100}, 
         {"$s5", 0b010101}, {"$s6", 0b010110}, {"$s7", 0b010111},{"$t8", 0b011000}, 
         {"$t9", 0b011001}, {"$gp", 0b011100}, {"$sp", 0b11101}, {"$fp", 0b011110},
-         {"$ra", 0b011111}
+        {"$ra", 0b011111}
     };
     if(reg == "$zero"){
         if(tp ==2 ){
@@ -141,17 +143,11 @@ sc_uint<32> registradorToBinary(sc_uint<4> opcd, string reg, int tp){
             return 0b0000000000000000;
         }
     } 
-    else if((opcd ==j_op)  & (tp == 1)){
+    else if((opcd ==j_op)){
          cout << "instrução jump"<< endl;
-        if(tp == 1){
-            sc_uint<6> jumpAddress = jumpLocations[reg];
-            cout << "o salto para " <<reg <<" leva ao endereco: " << jumpAddress << endl;
+        sc_uint<16> jumpAddress = jumpLocations[reg];
+        cout << "o salto para " <<reg <<" leva ao endereco: " << jumpAddress << endl;
         return jumpAddress;
-        }else if(tp == 2){
-            return 0b000000;
-        }else {
-            return 0b0000000000000000;
-        }
     }
      else if(opcd == not_op){
           cout << "instrução not"<< endl;
@@ -169,7 +165,7 @@ sc_uint<32> registradorToBinary(sc_uint<4> opcd, string reg, int tp){
     }else if(((opcd == beq_op) |( opcd == bne_op)) & (tp == 3)){
           cout << "instrução beq e bne"<< endl;
         if(jumpLocations.find(reg) != jumpLocations.end()){
-                 sc_uint<6> regIntern = jumpLocations[reg];
+                 sc_uint<16> regIntern = jumpLocations[reg];
         }else {
             cerr <<"AVISO: MARCAÇÃO USADA NÃO DEFINIDA NO Sistema";
             //sc_stop(); encerra a execução

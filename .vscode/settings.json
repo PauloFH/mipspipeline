@@ -65,7 +65,8 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeindex": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "temp": "c"
     },
     "discord.enabled": true
 }
