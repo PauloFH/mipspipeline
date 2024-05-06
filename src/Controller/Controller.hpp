@@ -178,6 +178,6 @@ SC_MODULE(Controller) {
 
     SC_CTOR(Controller) {
         SC_METHOD(updateState);
-        sensitive << clk.pos() << reset << opcode;
+        sensitive << clk.pos();
     }
 };
