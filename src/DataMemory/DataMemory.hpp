@@ -1,14 +1,14 @@
 #include <systemc.h>
 
-#define MEMORY_SIZE 512
+#define MEMORY_SIZE 4096
 
 SC_MODULE(DataMemory) {
     sc_in<bool> clk; 
     sc_in<bool> memWrite; 
     sc_in<bool> enable; 
-    sc_in<int> write_data; 
-    sc_in<int> address; 
-    sc_out<int> readData; 
+    sc_in<sc_int<32>> write_data; 
+    sc_in<sc_int<9>> address; 
+    sc_out<sc_int<32>> readData; 
 
     int memory[MEMORY_SIZE];
     
@@ -31,7 +31,7 @@ SC_MODULE(DataMemory) {
             memory[i] = 0;
         }
         SC_METHOD(memoryOperation);
-        sensitive << clk.pos();
+        sensitive << clk.value_changed();
     }
 
 };
