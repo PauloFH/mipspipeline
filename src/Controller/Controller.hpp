@@ -1,6 +1,6 @@
 #include <systemc.h>
 
-SC_MODULE(Control) {
+SC_MODULE(Controller) {
     sc_in<bool> clk;
     sc_in<int> opcode;
     sc_in<int> op1;
@@ -159,7 +159,7 @@ SC_MODULE(Control) {
         
     }
 
-    SC_CTOR(Control) {
+    SC_CTOR(Controller) {
         SC_METHOD(updateState);
         sensitive << clk.pos() << reset << opcode;
     }
