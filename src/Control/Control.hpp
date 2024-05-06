@@ -2,10 +2,11 @@
 
 SC_MODULE(Control) {
     sc_in<bool> clk;
-    sc_in<int> opcode;
-    sc_in<int> op1;
-    sc_in<int> op2;
-    sc_in<int> opd;
+    sc_in<sc_uint<32>> instruction;
+    sc_uint<4> opcode;
+    sc_uint<6> opd;
+    sc_uint<6> op1;
+    sc_uint<16> op2;
     sc_in <bool> zero;
     sc_in <bool> negative;
     sc_in <bool> reset;
@@ -58,6 +59,16 @@ SC_MODULE(Control) {
              regWrite.write(true);
     }
     void updateState() {
+
+        opcode = instruction.read().range(31,28);
+        opd = instruction.read().range(27,21);
+        
+        if (opcode == )
+        {
+            /* code */
+        }
+        
+
         switch (state)
         {
         case 0: 
@@ -82,7 +93,7 @@ SC_MODULE(Control) {
             break;
         case 4: 
             IR();
-            if(opcode.read() == 7){// LD
+            if(opcode == 7){// LD
                 regEnable.write(true);
                 regWrite.write(true);
                 dmEnable.write(true);
@@ -91,18 +102,18 @@ SC_MODULE(Control) {
                 DM.write(true);
                 state = 6;
                 
-            }else if(opcode.read()== 8){// ST
+            }else if(opcode == 8){// ST
                 dmEnable.write(true);
                 dmWrite.write(false);
                 RBW.write(true);
                 state = 7;
-            }else if(opcode.read() == 9){//J
+            }else if(opcode == 9){//J
                 pcEnable.write(false);
                 pcLoad.write(true);
                 pcjump.write(opd);
                 restart = true;
                 state = 8;
-            }else if(opcode.read() == 10){//JN
+            }else if(opcode == 10){//JN
                 if(negative.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
@@ -111,7 +122,7 @@ SC_MODULE(Control) {
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode.read() == 11){//JZ
+            }else if(opcode == 11){//JZ
                 if(zero.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
@@ -120,7 +131,7 @@ SC_MODULE(Control) {
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode.read() > 0  && opcode.read() < 7){//ALU
+            }else if(opcode > 0  && opcode < 7){//ALU
                 RBW.write(false);
                 regEnable.write(true);
                 regWrite.write(false);
@@ -160,6 +171,7 @@ SC_MODULE(Control) {
     }
 
     SC_CTOR(Control) {
+        SC_METHOD(instruDecode);
         SC_METHOD(updateState);
         sensitive << clk.pos() << reset << opcode;
     }
