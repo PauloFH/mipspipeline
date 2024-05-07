@@ -6,16 +6,14 @@ SC_MODULE(Controller) {
     addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
 
     sc_in<bool> clk;
-    //
+    
     sc_in<sc_uint<32>> instruction;
     sc_in <bool> zero;
-    sc_in <bool> notequal;
     sc_in <bool> reset;
 
     //Sinais do PC
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
-    sc_out<bool> pcLoad;
     sc_out<sc_uint<16>> pcjump;
 
     //Sinais dos Registradores
@@ -34,18 +32,19 @@ SC_MODULE(Controller) {
 
     //Sinais  BufferIDEX
     sc_out<bool> enable_BufferIDEX;
-    sc_out<bool> write_Buffer_IDEX;
+    sc_out<bool> write_BufferIDEX;
+    sc_out<bool> reset_BufferIDEX;
     //Sinais BufferEXMEM
 
     sc_out<bool> enable_BufferEXMEM;
     sc_out<bool> write_BufferEXMEM;
-    
+     sc_out<bool> reset_BufferEXMEM;
     //Sinais BufferMEMWB
     sc_out<bool> enable_BufferMEMWB;
     sc_out<bool> write_BufferMEMWB;
-
+    sc_out<bool> reset_BufferMEMWB;
     //Sinais do ALU
-    sc_in<sc_uint<4>>aluOp;
+    sc_out<sc_uint<4>>aluOp;
     sc_out<bool> aluReset;
 
 
@@ -120,14 +119,12 @@ SC_MODULE(Controller) {
                 state = 7;
             }else if(opcode == 9){//J
                 pcEnable.write(false);
-                pcLoad.write(true);
                 pcjump.write(label);
                 restart = true;
                 state = 8;
             }else if(opcode == 10){//bne
-                if(notequal.read()){
+                if(!zero.read()){
                     pcEnable.write(false);
-                    pcLoad.write(true);
                     pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
@@ -136,7 +133,6 @@ SC_MODULE(Controller) {
             }else if(opcode == 11){//beq
                 if(zero.read()){
                     pcEnable.write(false);
-                    pcLoad.write(true);
                     pcjump.write(label);
                     aluReset.write(true);
                     restart = true;

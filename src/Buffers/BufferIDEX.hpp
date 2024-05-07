@@ -5,6 +5,7 @@ SC_MODULE(BufferIDEX) {
     sc_in<bool>        clk;
     sc_in<bool>        enable;
     sc_in<bool>        write;
+    sc_in<bool>        reset;
     // vem do Controller
     sc_in<bool>        pcLoad;
     sc_in <bool>       dmEnable;
@@ -34,6 +35,12 @@ SC_MODULE(BufferIDEX) {
     }
 
     void update() {
+        if (reset.read()) {
+            register1_Output.write(0);
+            register2_Output.write(0);
+            destReg_Output.write(0);
+            opcode_Output.write(0);
+            pc_out.write(0);
          if (enable.read()) {
             if (write.read()) {
                 register1_Output.write(registerData1.read());
