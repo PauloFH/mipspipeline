@@ -10,6 +10,9 @@
 #include<Mux.hpp>
 #include<MuxDM.hpp>
 #include<BufferIFID.hpp>
+#include<BufferIDEX.hpp>
+#include<BufferEXMEM.hpp>
+#include<BufferMEMWB.hpp>
 
 int sc_main(int arg, char* argv[]) {
 
@@ -27,12 +30,18 @@ int sc_main(int arg, char* argv[]) {
 
 	Addr Addr("Addr");
 
-
 	Mux Mux("Mux");
 
 	MuxDM MuxDM("MuxDM");
 
 	BufferIFID BufferIFID("BufferIFID");
+
+	BufferIDEX BufferIDEX("BufferIDEX");
+
+	BufferEXMEM BufferEXMEM("BufferEXMEM");
+
+	BufferMEMWB BufferMEMWB("BufferMEMWB");
+
 //-----------------------------------------------------------------------------------------------
 
 	sc_signal<bool>       clock; // Clock signal
@@ -47,16 +56,16 @@ int sc_main(int arg, char* argv[]) {
 	// Signals for InstructionMemory
 	sc_signal<bool>       IM_enable;
 	//sc_signal<sc_uint<9>> PC_IM_address;
-	sc_signal<sc_uint<32>>IM_BufferIFIM_instructionIM;
+	sc_signal<sc_uint<32>>IM_BufferIFID_instructionIM;
 
 	// Signals for Registers
 	sc_signal<bool>       RegistersData_Controller_RegWrite;
 	sc_signal<sc_uint<6>> RegistersData_MUX3_writeRegister;
 	sc_signal<sc_int<32>> RegistersData_MUX4_writeData;
-	sc_signal<sc_uint<6>> BufferIFIM_RegistersData_readRegister1;
-	sc_signal<sc_uint<6>> BufferIFIM_RegistersData_readRegister2;
-	sc_signal<sc_int<32>> RegistersData_Buffer2_readData1;
-	sc_signal<sc_int<32>> RegistersData_Buffer2_readData2;
+	sc_signal<sc_uint<6>> BufferIFID_RegistersData_readRegister1;
+	sc_signal<sc_uint<6>> BufferIFID_RegistersData_readRegister2;
+	sc_signal<sc_int<32>> RegistersData_BufferIDEX_readData1;
+	sc_signal<sc_int<32>> RegistersData_BufferIDEX_readData2;
 	sc_signal<sc_uint<4>> BufferIFID_RegistersData_opcode;
 	sc_signal<sc_int<16>> BufferIFID_RegistersData_immediate;
 	
@@ -66,8 +75,8 @@ int sc_main(int arg, char* argv[]) {
 	// Signals for ALU
 	sc_signal<bool>       ALU_Buffer3_zero;
 	sc_signal<bool>       ALU_Buffer3_notequal;
-	sc_signal<sc_uint<4>> Controller_ALU_opcode;
-	sc_signal<sc_int<32>> Buffer2_ALU_input1;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_opcode;
+	sc_signal<sc_int<32>> BufferIDEX_ALU_input1;
 	sc_signal<sc_int<32>> ALU_MuxDST_ALU_input2;
 	sc_signal<sc_int<32>> ALU_Buffer3_result;
 
@@ -79,13 +88,13 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_int<32>> DM_Buffer4_readData;
 
 	// Signals for AddA
-	sc_signal<sc_uint<9>> Buffer2_AddA_input1;
-	sc_signal<sc_uint<9>> Buffer2_AddA_input2;
+	sc_signal<sc_uint<9>> BufferIDEX_AddA_input1;
+	sc_signal<sc_uint<9>> BufferIDEX_AddA_input2;
 	sc_signal<sc_uint<9>> AddA_Buffer3_output;
 
 	// Signals for Addr
 	sc_signal<sc_uint<9>> PC_Addr_input;
-	sc_signal<sc_uint<9>> Addr_BufferIFIM_output; // BufferIFID
+	sc_signal<sc_uint<9>> Addr_BufferIFID_output; // BufferIFID
 
 
 	// MuxPC signals
@@ -101,19 +110,47 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_int<32>> MuxDM_Alu_output;
 
 	//BufferIFID signals
-	sc_signal<bool>        BufferIFID_reset;
 	sc_signal<sc_uint<9>>  BufferIFID_BufferIDEX_address;
 	sc_signal<sc_uint<6>> BufferIFID_BufferIDEX_DestReg;
+
+	//BufferIDEX signals
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_address;
+	sc_signal<sc_uint<6>> BufferIDEX_BufferEXMEM_opDestino;
+	sc_signal<sc_uint<4>> Controller_BufferIDEX_opcode;
+
+
+
 
 
 	//Controller signals
 	sc_signal<sc_uint<32>> BufferIFID_Controller_instruction;
+	sc_signal<sc_uint<4>> Controller_BufferIDEX_opcode;
+	sc_signal<bool> Controller_BufferIDEX_enable;
+	sc_signal<bool> Controller_BufferIDEX_write;
+	sc_signal<bool> Controller_BufferIDEX_pcLoad;
+	sc_signal<bool> Controller_BufferIDEX_dmEnable;
+	sc_signal<bool> Controller_BufferIDEX_dmWrite;
+	sc_signal<bool> Controller_BufferIDEX_regWrite;
+	sc_signal<bool> Controller_BufferIDEX_aluReset;
+	sc_signal<sc_uint<4>> Controller_BufferIDEX_aluOp;
+	sc_signal<bool> Controller_BufferIDEX_Branch;
+	sc_signal<bool> Controller_BufferIDEX_memToReg;
+	sc_signal<sc_uint<16>> Controller_BufferIDEX_pcJump;
+
+	//BufferEXMEM signals
+	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_opDestino;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_dmWrite;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_regWrite;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_memToReg;
+	
+
+
 //-----------------------------------------------------------------------------------------------
 
 	// Connecting the IM signals
 	IM.clk(clock);
 	IM.enable(IM_enable);
-	IM.instruction(IM_BufferIFIM_instructionIM);
+	IM.instruction(IM_BufferIFID_instructionIM);
 	IM.address(PC_IM_address);
 
 	// Connecting the PC signals
@@ -130,17 +167,17 @@ int sc_main(int arg, char* argv[]) {
 	RegistersData.opcode(BufferIFID_RegistersData_opcode);
 	RegistersData.writeRegister(RegistersData_MUX3_writeRegister);
 	RegistersData.writeData(RegistersData_MUX4_writeData);
-	RegistersData.readRegister1(BufferIFIM_RegistersData_readRegister1);
-	RegistersData.readRegister2(BufferIFIM_RegistersData_readRegister2);
+	RegistersData.readRegister1(BufferIFID_RegistersData_readRegister1);
+	RegistersData.readRegister2(BufferIFID_RegistersData_readRegister2);
 	RegistersData.immediate(BufferIFID_RegistersData_immediate);
-	RegistersData.readData1(RegistersData_Buffer2_readData1);
-	RegistersData.readData2(RegistersData_Buffer2_readData2);
+	RegistersData.readData1(RegistersData_BufferIDEX_readData1);
+	RegistersData.readData2(RegistersData_BufferIDEX_readData2);
 	
 	// Connecting the ALU signals
 	ALU.zero(ALU_Buffer3_zero);
 	ALU.notequal(ALU_Buffer3_notequal);
-	ALU.opcode(Controller_ALU_opcode);
-	ALU.first_value(Buffer2_ALU_input1);
+	ALU.opcode(BufferIDEX_ALU_opcode);
+	ALU.first_value(BufferIDEX_ALU_input1);
 	ALU.second_value(ALU_MuxDST_ALU_input2);
 	ALU.output_value(ALU_Buffer3_result);
 
@@ -153,13 +190,13 @@ int sc_main(int arg, char* argv[]) {
 	DM.readData(DM_Buffer4_readData);
 
 	// Connecting the AddA signals
-	AddA.first_value(Buffer2_AddA_input1);
-	AddA.second_value(Buffer2_AddA_input2);
+	AddA.first_value(BufferIDEX_AddA_input1);
+	AddA.second_value(BufferIDEX_AddA_input2);
 	AddA.output_value(AddA_Buffer3_output);
 
 	// Connecting the Addr signals
 	Addr.first_value(PC_Addr_input);
-	Addr.output_value(Addr_BufferIFIM_output);
+	Addr.output_value(Addr_BufferIFID_output);
 
 	// Connecting the MuxPC signals
 	Mux.pcSRC(Buffer3_Branch_MuxPC_pcSRC);
@@ -175,18 +212,38 @@ int sc_main(int arg, char* argv[]) {
 
 	// Connecting the BufferIFID signals
 	BufferIFID.clk(clock);
-	BufferIFID.reset(BufferIFID_reset);
-	BufferIFID.instruction(IM_BufferIFIM_instructionIM);
-	BufferIFID.Address_Addr(Addr_BufferIFIM_output);
+	BufferIFID.instruction(IM_BufferIFID_instructionIM);
+	BufferIFID.Address_Addr(Addr_BufferIFID_output);
 	BufferIFID.Address_Addr_Out(BufferIFID_BufferIDEX_address);
 	BufferIFID.instruction_out(BufferIFID_Controller_instruction);
-	BufferIFID.readRegister1(BufferIFIM_RegistersData_readRegister1);
-	BufferIFID.readRegister2(BufferIFIM_RegistersData_readRegister2);
+	BufferIFID.readRegister1(BufferIFID_RegistersData_readRegister1);
+	BufferIFID.readRegister2(BufferIFID_RegistersData_readRegister2);
 	BufferIFID.opcode_out(BufferIFID_RegistersData_opcode);
 	BufferIFID.DestReg_out(BufferIFID_BufferIDEX_DestReg);
 	BufferIFID.immediate_out(BufferIFID_RegistersData_immediate);
 
-	
+	//Connecting the BufferIDEX signals
+	BufferIDEX.clk(clock);
+	BufferIDEX.destReg(BufferIDEX_BufferEXMEM_opDestino);
+	BufferIDEX.opcode(Controller_BufferIDEX_opcode);
+	BufferIDEX.registerData1(RegistersData_BufferIDEX_readData1);
+	BufferIDEX.registerData2(RegistersData_BufferIDEX_readData2);
+	BufferIDEX.pc_out(BufferIDEX_BufferEXMEM_address);
+	BufferIDEX.enable(Controller_BufferIDEX_enable);
+	BufferIDEX.write(Controller_BufferIDEX_write);
+	BufferIDEX.pcLoad(Controller_BufferIDEX_pcLoad);
+	BufferIDEX.dmEnable(Controller_BufferIDEX_dmEnable);
+	BufferIDEX.dmWrite(Controller_BufferIDEX_dmWrite);
+	BufferIDEX.regWrite(Controller_BufferIDEX_regWrite);
+	BufferIDEX.aluReset(Controller_BufferIDEX_aluReset);
+	BufferIDEX.aluOp(Controller_BufferIDEX_aluOp);
+	BufferIDEX.Branch(Controller_BufferIDEX_Branch);
+	BufferIDEX.memToReg(Controller_BufferIDEX_memToReg);
+	BufferIDEX.pcJump(Controller_BufferIDEX_pcJump);
+
+	//Connecting the BufferEXMEM signals
+	BufferEXMEM.clk(clock);
+
 
 	// Connecting the Controller signals
 

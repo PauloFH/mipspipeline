@@ -7,9 +7,7 @@ SC_MODULE(BufferIDEX) {
     sc_in<bool>        write;
     
     // vem do Controller
-    sc_in<sc_uint<4>>  opcode;
     sc_in<bool>        pcLoad;
-    sc_in<sc_uint<16>> pcjump;
     sc_in <bool>       dmEnable;
     sc_in <bool>       dmWrite;
     sc_in<bool>        regWrite;
@@ -17,13 +15,12 @@ SC_MODULE(BufferIDEX) {
     sc_in<sc_uint<4>>  aluOp;
     sc_in<bool>        Branch;
     sc_in<bool>        memToReg;
- 
+
+     sc_in<sc_uint<4>>  opcode;
+    sc_in<sc_uint<16>> pcJump;
     // vem do Registers
     sc_in<sc_int<32>>  registerData1;
     sc_in<sc_int<32>>  registerData2;
-                       
-    // vem do AddA     
-    sc_in<sc_uint<32>> addr_input;
 
     // vem do MuxDST
     sc_in<sc_uint<6>>  destReg;
@@ -49,7 +46,7 @@ SC_MODULE(BufferIDEX) {
                 register2_Output.write(registerData2.read());
                 destReg_Output.write(destReg.read());
                 opcode_Output.write(opcode.read());
-                pc_out.write(pcjump.read());
+                pc_out.write(pcJump.read());
             }
         }
     }
