@@ -14,6 +14,7 @@ SC_MODULE(Controller) {
     //Sinais do PC
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
+    sc_out<bool> PcLoad;
     sc_out<sc_uint<16>> pcjump;
 
     //Sinais dos Registradores

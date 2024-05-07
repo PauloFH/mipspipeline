@@ -10,13 +10,14 @@ SC_MODULE(BufferIDEX) {
     sc_in<bool>        pcLoad;
     sc_in <bool>       dmEnable;
     sc_in <bool>       dmWrite;
-    sc_in<bool>        regWrite;
     sc_in<bool>        aluReset;
     sc_in<sc_uint<4>>  aluOp;
     sc_in<bool>        Branch;
     sc_in<bool>        memToReg;
      sc_in<sc_uint<4>>  opcode;
     sc_in<sc_uint<16>> pcJump;
+    sc_in<sc_uint<16>> label_j;
+
     // vem do Registers
     sc_in<sc_int<32>>  registerData1;
     sc_in<sc_int<32>>  registerData2;
@@ -27,6 +28,8 @@ SC_MODULE(BufferIDEX) {
     
     sc_out<sc_uint<6>> destReg_Output;
 
+    sc_out<bool> Branch_Output;
+    sc_out<bool> memToReg_Output;
     sc_out<sc_uint<4>> opcode_Output;
     sc_out<sc_uint<16>> pc_out;
     SC_CTOR(BufferIDEX) {
@@ -49,6 +52,7 @@ SC_MODULE(BufferIDEX) {
                 opcode_Output.write(opcode.read());
                 pc_out.write(pcJump.read());
             }
+        }
         }
     }
 };
