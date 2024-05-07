@@ -17,7 +17,7 @@ SC_MODULE(BufferEXMEM) {
     sc_uint<6> Intern_opdest;
     sc_uint<32> Intern_ALU_result;
 
-
+    SC_HAS_PROCESS(BufferEXMEM);
 
 
     void bufferEXMEM() {
@@ -33,7 +33,8 @@ SC_MODULE(BufferEXMEM) {
     }
 
     SC_CTOR(BufferEXMEM) {
-
+        SC_METHOD(bufferEXMEM);
+        sensitive << clk.pos();
         
     }
 };

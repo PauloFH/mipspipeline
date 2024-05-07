@@ -38,15 +38,14 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool>       clock; // Clock signal
 
 	// Signals for ProgramCounter
-    sc_signal<sc_uint<9>> PC_Input;
+    sc_signal<sc_uint<16>> PC_Input;
     sc_signal<bool>       PC_reset;
 	sc_signal<bool>       PC_enable;
 	sc_signal<bool>       PC_load;
-    sc_signal<sc_uint<9>> PC_IM_address;
+    sc_signal<sc_uint<16>> PC_IM_address;
 
 	// Signals for InstructionMemory
 	sc_signal<bool>       IM_enable;
-	sc_signal<bool>       IM_write;
 	//sc_signal<sc_uint<9>> PC_IM_address;
 	sc_signal<sc_uint<32>>IM_BufferIFIM_instructionIM;
 
@@ -76,7 +75,7 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool>       Buffer3_DM_enable;
 	sc_signal<bool>       Buffer3_DM_memWrite;
 	sc_signal<sc_int<32>> Buffer3_DM_write_data;
-	sc_signal<sc_int<9>>  Buffer3_DM_address;
+	sc_signal<sc_int<32>>  Buffer3_DM_address;
 	sc_signal<sc_int<32>> DM_Buffer4_readData;
 
 	// Signals for AddA
@@ -114,7 +113,6 @@ int sc_main(int arg, char* argv[]) {
 	// Connecting the IM signals
 	IM.clk(clock);
 	IM.enable(IM_enable);
-	IM.write(IM_write);
 	IM.instruction(IM_BufferIFIM_instructionIM);
 	IM.address(PC_IM_address);
 

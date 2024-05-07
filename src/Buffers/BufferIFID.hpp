@@ -3,8 +3,8 @@
 SC_MODULE(BufferIFID) {
     // Entradas
     sc_in<bool>         clk;
-    sc_in<bool>         reset;
-
+    sc_in<bool>         enable;
+    sc_in<bool>         write;
     sc_in<sc_uint<32>>  instruction;
     sc_in<sc_uint<9>>   Address_Addr;
 
@@ -24,33 +24,36 @@ SC_MODULE(BufferIFID) {
     sc_uint<4>          Intern_opcode;
     sc_int<16>          Intern_immediate;
    
+   SC_HAS_PROCESS(BufferIFID);
     void bufferProcess() {
-        if (reset.read()) {
-            instruction_out.write(0);
-        } else {
+        if(enable.read()){
+            if(write.read()){
             Intern_Address_Addr = Address_Addr.read();
             Intern_instruction = instruction.read();
-            instruction_out.write(Intern_instruction);
-            Address_Addr_Out.write(Intern_Address_Addr);
             Intern_readRegister1 =  Intern_instruction.range(27, 21);
-            readRegister1.write(Intern_readRegister1);
             Intern_opcode = Intern_instruction.range(31, 28);
-            opcode_out.write(Intern_opcode);
             if(Intern_opcode == 0b0111){
                 Intern_readRegister2 =  0b000000;
-                readRegister2.write(Intern_readRegister2);
+                
                 Intern_immediate = Intern_instruction.range(15, 0);
-                immediate_out.write(Intern_immediate);
             }else{
-            Intern_readRegister2 =  Intern_instruction.range(20, 16);
-            readRegister2.write(Intern_readRegister2);
+                Intern_readRegister2 =  Intern_instruction.range(20, 16);
+                Intern_immediate = 0;
             }
+            }
+            instruction_out.write(Intern_instruction);
+            Address_Addr_Out.write(Intern_Address_Addr);
+            readRegister1.write(Intern_readRegister1);
+            opcode_out.write(Intern_opcode);
+            immediate_out.write(Intern_immediate);
+            readRegister2.write(Intern_readRegister2);
+            Intern_readRegister2 = Intern_instruction.range(20, 16);
+            readRegister2.write(Intern_readRegister2);
         }
     }
 
      SC_CTOR(BufferIFID) {
         SC_METHOD(bufferProcess);
         sensitive << clk.pos();
-        async_reset_signal_is(reset, true);
     }
 };

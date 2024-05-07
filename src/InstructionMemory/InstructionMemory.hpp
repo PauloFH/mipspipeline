@@ -11,11 +11,13 @@ SC_MODULE(InstructionMemory)
     sc_in<bool> clk;
     sc_in<bool> enable;
     sc_in<bool> write;
-    sc_in<sc_uint<9>> address;
+    sc_in<sc_uint<16>> address;
     sc_out<sc_uint<32>> instruction;
-    int internInstruction;
+    sc_uint<32> internInstruction;
     sc_uint<32> memory[1024];
-   
+
+    SC_HAS_PROCESS(InstructionMemory);
+
     void fetchInstruction()
     {
         while (true)
@@ -23,6 +25,9 @@ SC_MODULE(InstructionMemory)
             wait();
             if (enable.read())
             {
+                if(write.read()){
+                    memory[address.read()] = instruction.read();
+                }
                 instruction.write(memory[address.read()]);
             }
         }
@@ -242,7 +247,7 @@ sc_uint<32> registradorToBinary(sc_uint<4> opcd, string reg, int tp){
 
 SC_CTOR(InstructionMemory)
 {   convertAsmInInstructions();
-    SC_METHOD(fetchInstruction);
+    SC_THREAD(fetchInstruction);
     sensitive << clk.pos();
 }
 

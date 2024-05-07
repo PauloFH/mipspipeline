@@ -6,61 +6,65 @@ SC_MODULE(Controller) {
     addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
 
     sc_in<bool> clk;
+    //
     sc_in<sc_uint<32>> instruction;
-    sc_uint<32> label;
-    sc_uint<4> opcode;
-    sc_uint<6> opd;
-    sc_uint<6> op1;
-    sc_uint<16> op2;
     sc_in <bool> zero;
-    sc_in <bool> negative;
+    sc_in <bool> notequal;
     sc_in <bool> reset;
 
     //Sinais do PC
-
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
     sc_out<bool> pcLoad;
     sc_out<sc_uint<16>> pcjump;
 
     //Sinais dos Registradores
-
-    sc_out<bool> regWrite;
     sc_out<bool> regEnable;
+    sc_out<bool> regWrite;
 
     //Sinais da Instruction Memory
-
     sc_out<bool> imEnable;
-    sc_out<bool> imWrite;
+    sc_out<bool> imwrite;
 
-    //Sinais da Data Memory
-
+    // Sinais da Data Memory
     sc_out <bool> dmEnable;
     sc_out <bool> dmWrite;
 
-    //Sinais da ALU
-
-    sc_out<bool> aluReset;
-    sc_out<int>  aluOp;
-
-    sc_out<bool> Branch;
     sc_out<bool> memToReg;
 
-    sc_out<bool> RBW;
-    sc_out<bool> DM;
+    //Sinais  BufferIDEX
+    sc_out<bool> enable_BufferIDEX;
+    sc_out<bool> write_Buffer_IDEX;
+    //Sinais BufferEXMEM
+
+    sc_out<bool> enable_BufferEXMEM;
+    sc_out<bool> write_BufferEXMEM;
+    
+    //Sinais BufferMEMWB
+    sc_out<bool> enable_BufferMEMWB;
+    sc_out<bool> write_BufferMEMWB;
+
+    //Sinais do ALU
+    sc_in<sc_uint<4>>aluOp;
+    sc_out<bool> aluReset;
+
+
+    //locais
+    sc_uint<32> label;
+    sc_uint<4> opcode;
+    sc_uint<6> opd;
+    sc_uint<6> op1;
+    sc_uint<16> op2;
 
     int state = 0;
     bool restart;
 
-    void ID(){
+    void IF(){
         imEnable.write(true);
-        imWrite.write(false);
         pcEnable.write(true);
     }
-    void IR(){
+    void ID(){
          imEnable.write(false);
-         regWrite.write(true);
-         regEnable.write(true);
          pcEnable.write(false);
     }
     void RE(){
@@ -80,11 +84,11 @@ SC_MODULE(Controller) {
         switch (state)
         {
         case 0: 
-                ID();
+                IF();
                 state = 1;
             break;
         case 1:
-                IR();
+                ID();
                 state = 2;
             break;
         case 2:
@@ -97,50 +101,49 @@ SC_MODULE(Controller) {
         case 3:
              regEnable.write(true);
              state = 4;
-            ID();
+            IF();
             break;
         case 4: 
-            IR();
-            if(opcode == 7){// LD
+            ID();
+            if(opcode == 7){// Lw
                 regEnable.write(true);
                 regWrite.write(true);
                 dmEnable.write(true);
                 dmWrite.write(true);
-                RBW.write(true);
-                DM.write(true);
+                regWrite.write(true);
                 state = 6;
                 
-            }else if(opcode == 8){// ST
+            }else if(opcode == 8){// Sw
                 dmEnable.write(true);
                 dmWrite.write(false);
-                RBW.write(true);
+                regWrite.write(true);
                 state = 7;
             }else if(opcode == 9){//J
                 pcEnable.write(false);
                 pcLoad.write(true);
-                pcjump.write(opd);
+                pcjump.write(label);
                 restart = true;
                 state = 8;
-            }else if(opcode == 10){//JN
-                if(negative.read()){
+            }else if(opcode == 10){//bne
+                if(notequal.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
-                    pcjump.write(opd);
+                    pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode == 11){//JZ
+            }else if(opcode == 11){//beq
                 if(zero.read()){
                     pcEnable.write(false);
                     pcLoad.write(true);
-                    pcjump.write(opd);
+                    pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
                 }
                 state = 8;
             }else if(opcode > 0  && opcode < 7){//ALU
-                RBW.write(false);
+                regWrite.write(false);
                 regEnable.write(true);
                 regWrite.write(false);
                 state = 9;

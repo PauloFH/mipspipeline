@@ -2,10 +2,10 @@
 
 SC_MODULE(ProgramCounter) {
     sc_in<bool> clk; 
-    sc_in<sc_uint<9>> pcInput;
+    sc_in<sc_uint<16>> pcInput;
     sc_in<bool> reset,  enable, load;
-    sc_out<sc_uint<9>> pcOutput;
-    sc_uint<9> currentInstruction;
+    sc_out<sc_uint<16>> pcOutput;
+    sc_uint<16> currentInstruction;
 
     void counterIntruction() {
         if(reset.read()){
