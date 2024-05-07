@@ -143,7 +143,6 @@ public:
         {
             cerr << "opcode não localizado" << endl;
         }
-        cout << "o valor do ocode é: " << opcodeValue << endl;
         binaryValue.range(31, 28) = opcodeValue;
         if ((opcodeValue == lw_op) | (opcodeValue == sw_op))
         {
@@ -181,14 +180,14 @@ public:
         }
         else if ((opcd == j_op))
         {
-            cout << "instrução jump" << endl;
+            
             sc_uint<16> jumpAddress = jumpLocations[reg];
-            cout << "o salto para " << reg << " leva ao endereco: " << jumpAddress << endl;
+            
             return jumpAddress;
         }
         else if (opcd == not_op)
         {
-            cout << "instrução not" << endl;
+         
             if ((tp == 1) | (tp == 2))
             {
                 sc_uint<6> regIntern = 0b000000000;
@@ -196,7 +195,7 @@ public:
                 {
                     regIntern = registradores[reg];
                     return regIntern;
-                    cout << reg << endl;
+                    
                 }
                 else
                 {
@@ -210,7 +209,7 @@ public:
         }
         else if (((opcd == beq_op) | (opcd == bne_op)) & (tp == 3))
         {
-            cout << "instrução beq e bne" << endl;
+            
             if (jumpLocations.find(reg) != jumpLocations.end())
             {
                 sc_uint<16> regIntern = jumpLocations[reg];
@@ -218,12 +217,12 @@ public:
             else
             {
                 cerr << "AVISO: MARCAÇÃO USADA NÃO DEFINIDA NO Sistema";
-                // sc_stop(); encerra a execução
+                sc_stop(); 
             }
         }
         else if ((opcd == addi_op) & (tp == 3))
         {
-            cout << "instrução addi" << endl;
+            
             sc_uint<6> regIntern = stoi(reg);
             return regIntern;
         }
@@ -269,10 +268,6 @@ public:
                     cerr << "formato de dado de lw/sw errado" << endl;
                 }
                 sc_uint<22> lwresult = 0;
-                cout << endl
-                     << "no lw/sw: " << endl
-                     << " registrador destino/origem: " << registerIntern << " em biset: " << bitset<6>(registerIntern) << endl;
-                cout << "o offset é : " << offset << " em bitset fica: " << bitset<16>(offset) << endl;
                 lwresult.range(21, 16) = registerIntern;
                 lwresult.range(15, 0) = offset;
                 return lwresult;
@@ -287,7 +282,6 @@ public:
                 {
                     regIntern = registradores[reg];
                     return regIntern;
-                    cout << reg << endl;
                 }
                 else
                 {
@@ -301,7 +295,7 @@ public:
                 {
                     regIntern = registradores[reg];
                     return regIntern;
-                    cout << reg << endl;
+                  
                 }
                 else
                 {
