@@ -1,5 +1,6 @@
 #include <systemc.h>
-
+#include <iostream>
+using namespace std;
 SC_MODULE(ProgramCounter) {
     sc_in<bool> clk; 
     sc_in<sc_uint<16>> pcInput;
@@ -12,12 +13,14 @@ SC_MODULE(ProgramCounter) {
     sc_uint<16> currentInstruction;
 
     void counterIntruction() {
+        currentInstruction = 0;
         if(reset.read()){
             currentInstruction = 0;
             pcOutput.write(currentInstruction);
         }else if(enable.read()){
-            currentInstruction += 1;
+            currentInstruction =currentInstruction + 1;
             pcOutput.write(currentInstruction);
+            cout <<sc_time_stamp()<< "  PC: " <<  pcOutput.read() << endl;
         }else if(load.read()){
             currentInstruction = pcInput.read();
             pcOutput.write(currentInstruction);
@@ -27,6 +30,7 @@ SC_MODULE(ProgramCounter) {
     SC_CTOR(ProgramCounter) {
        currentInstruction = 0; 
         SC_METHOD(counterIntruction);
-        sensitive << clk.pos() << reset;
+        sensitive << clk.pos();
+        sensitive << reset;
     }
 };
