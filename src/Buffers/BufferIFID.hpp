@@ -5,6 +5,7 @@ SC_MODULE(BufferIFID) {
     sc_in<bool>         clk;
     sc_in<bool>         enable;
     sc_in<bool>         write;
+    sc_in<bool>         reset;
     sc_in<sc_uint<32>>  instruction;
     sc_in<sc_uint<16>>   Address_Addr;
 
@@ -27,6 +28,16 @@ SC_MODULE(BufferIFID) {
     sc_int<16>          Intern_immediate;
     enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
     void bufferProcess() {
+        if(reset.read()){
+            Address_Addr_Out.write(0);
+            instruction_out.write(0);
+            readRegister1.write(0);
+            readRegister2.write(0);
+            immediate_out.write(0);
+            opcode_out.write(0);
+            DestReg_out.write(0);
+            label_j.write(0);
+        }
         
         if(enable.read()){
             if(write.read()){

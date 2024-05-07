@@ -6,7 +6,6 @@ SC_MODULE(ProgramCounter) {
     sc_in<sc_uint<16>> pcInput;
     sc_in<bool> reset;
     sc_in<bool>enable;
-    sc_in<bool>  load;
     
     sc_out<sc_uint<16>> pcOutput;
     
@@ -18,10 +17,6 @@ SC_MODULE(ProgramCounter) {
             currentInstruction = 0;
             pcOutput.write(currentInstruction);
         }else if(enable.read()){
-            currentInstruction =currentInstruction + 1;
-            pcOutput.write(currentInstruction);
-            cout <<sc_time_stamp()<< "  PC: " <<  pcOutput.read() << endl;
-        }else if(load.read()){
             currentInstruction = pcInput.read();
             pcOutput.write(currentInstruction);
         }

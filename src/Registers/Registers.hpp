@@ -1,7 +1,6 @@
 #include <systemc.h>
 
 #define NUM_REGISTERS 32
-#define RAND_MAX 255
 
 SC_MODULE(Registers)
 {
@@ -57,8 +56,8 @@ SC_MODULE(Registers)
         }
 
         SC_METHOD(writeRegistrator);
-        sensitive << clk.value_changed();
-
+        sensitive << clk.pos();
+        
         SC_METHOD(readRegistrator);
         sensitive << readRegister1 << readRegister2;
     }
