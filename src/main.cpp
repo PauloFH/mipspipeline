@@ -66,7 +66,7 @@ int sc_main(int arg, char* argv[]) {
 
 	// Signals for ALU
 	sc_signal<bool>       ALU_Buffer3_zero;
-	sc_signal<bool>       ALU_Buffer3_negative;
+	sc_signal<bool>       ALU_Buffer3_notequal;
 	sc_signal<sc_uint<4>> Controller_ALU_opcode;
 	sc_signal<sc_int<32>> Buffer2_ALU_input1;
 	sc_signal<sc_int<32>> ALU_MuxDST_ALU_input2;
@@ -140,7 +140,7 @@ int sc_main(int arg, char* argv[]) {
 	
 	// Connecting the ALU signals
 	ALU.zero(ALU_Buffer3_zero);
-	ALU.negative(ALU_Buffer3_negative);
+	ALU.notequal(ALU_Buffer3_notequal);
 	ALU.opcode(Controller_ALU_opcode);
 	ALU.first_value(Buffer2_ALU_input1);
 	ALU.second_value(ALU_MuxDST_ALU_input2);

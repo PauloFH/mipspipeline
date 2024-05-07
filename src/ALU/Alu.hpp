@@ -7,12 +7,12 @@ SC_MODULE(Alu){
     sc_in <sc_uint<4>> opcode;
     sc_in <sc_int<32>> first_value,second_value;
     sc_out <sc_int<32>> output_value;
-    sc_out <bool> zero, negative;
+    sc_out <bool> zero, notequal;
     sc_int<32> internDataA, internDataB, internResult;
 
     void aluOperation(){
         zero = false;
-		negative = false;
+		notequal = false;
         internDataA = first_value.read();
         internDataB = second_value.read();
 		
@@ -37,13 +37,13 @@ SC_MODULE(Alu){
 					internResult = internDataA - internDataB;
 						if(internResult == 0){
 							zero = true;
-							negative = false;
+							notequal = false;
 						}else{
 							zero = false;
-							if(internResult < 0){
-							negative = true;
+							if(internResult != 0){
+							notequal = true;
 							}else{
-								negative = false;
+								notequal = false;
 							}
 						}
 					output_value.write(internResult);
