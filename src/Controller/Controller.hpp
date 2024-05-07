@@ -1,55 +1,72 @@
 #include <systemc.h>
 
-SC_MODULE(Controller) {
+SC_MODULE(Controller)
+{
 
-    enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,
-    addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
+    enum OpC
+    {
+        zero_op = 0b0000,
+        and_op = 0b0001,
+        or_op = 0b0010,
+        xor_op = 0b0011,
+        not_op = 0b0100,
+        slt_op = 0b0101,
+        cmp_op = 0b0101,
+        add_op = 0b0110,
+        addi_op = 0b0111,
+        sub_op = 0b1000,
+        lw_op = 0b1001,
+        sw_op = 0b1010,
+        j_op = 0b1011,
+        beq_op = 0b1100,
+        bne_op = 0b1101
+    };
 
     sc_in<bool> clk;
-    
-    sc_in<sc_uint<32>> instruction;
-    sc_in <bool> zero;
-    sc_in <bool> reset;
 
-    //Sinais do PC
+    sc_in<sc_uint<32>> instruction;
+    sc_in<bool> zero;
+    sc_in<bool> reset;
+
+    // Sinais do PC
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
     sc_out<bool> PcLoad;
     sc_out<sc_uint<16>> pcjump;
 
-    //Sinais dos Registradores
+    // Sinais dos Registradores
     sc_out<bool> regEnable;
     sc_out<bool> regWrite;
 
-    //Sinais da Instruction Memory
+    // Sinais da Instruction Memory
     sc_out<bool> imEnable;
     sc_out<bool> imwrite;
 
     // Sinais da Data Memory
-    sc_out <bool> dmEnable;
-    sc_out <bool> dmWrite;
+    sc_out<bool> dmEnable;
+    sc_out<bool> dmWrite;
 
     sc_out<bool> memToReg;
 
-    //Sinais  BufferIDEX
+    // Sinais  BufferIDEX
     sc_out<bool> enable_BufferIDEX;
     sc_out<bool> write_BufferIDEX;
     sc_out<bool> reset_BufferIDEX;
-    //Sinais BufferEXMEM
+    sc_out<bool> branch;
+    // Sinais BufferEXMEM
 
     sc_out<bool> enable_BufferEXMEM;
     sc_out<bool> write_BufferEXMEM;
-     sc_out<bool> reset_BufferEXMEM;
-    //Sinais BufferMEMWB
+    sc_out<bool> reset_BufferEXMEM;
+    // Sinais BufferMEMWB
     sc_out<bool> enable_BufferMEMWB;
     sc_out<bool> write_BufferMEMWB;
     sc_out<bool> reset_BufferMEMWB;
-    //Sinais do ALU
-    sc_out<sc_uint<4>>aluOp;
+    // Sinais do ALU
+    sc_out<sc_uint<4>> aluOp;
     sc_out<bool> aluReset;
 
-
-    //locais
+    // locais
     sc_uint<32> label;
     sc_uint<4> opcode;
     sc_uint<6> opd;
@@ -59,87 +76,109 @@ SC_MODULE(Controller) {
     int state = 0;
     bool restart;
 
-    void IF(){
+    void IF()
+    {
         imEnable.write(true);
         pcEnable.write(true);
     }
-    void ID(){
-         imEnable.write(false);
-         pcEnable.write(false);
+    void ID()
+    {
+        imEnable.write(false);
+        pcEnable.write(false);
     }
-    void RE(){
-             regEnable.write(true);
-             regWrite.write(true);
+    void RE()
+    {
+        regEnable.write(true);
+        regWrite.write(true);
     }
-    void updateState() {
+    void updateState()
+    {
 
-        opcode = instruction.read().range(31,28);
-        label = instruction.read().range(27,0);
-        opd = instruction.read().range(27,22);
-        op1 = instruction.read().range(21,16);
-        op2 = instruction.read().range(15,0);
-       
-        
+        opcode = instruction.read().range(31, 28);
+        label = instruction.read().range(27, 0);
+        opd = instruction.read().range(27, 22);
+        op1 = instruction.read().range(21, 16);
+        op2 = instruction.read().range(15, 0);
 
+        if (opcode == beq_op)
+        {
+            branch.write(true);
+        }
+        else if(opcode == bne_op)
+        {
+            branch.write(false);
+        }
         switch (state)
         {
-        case 0: 
-                IF();
-                state = 1;
+        case 0:
+            IF();
+            state = 1;
             break;
         case 1:
-                ID();
-                state = 2;
+            ID();
+            state = 2;
             break;
         case 2:
-                if (!restart)
-                {
-                    RE();
-                    state = 3;
-                }
+            if (!restart)
+            {
+                RE();
+                state = 3;
+            }
             break;
         case 3:
-             regEnable.write(true);
-             state = 4;
+            regEnable.write(true);
+            state = 4;
             IF();
             break;
-        case 4: 
+        case 4:
             ID();
-            if(opcode == 7){// Lw
+            if (opcode == 7)
+            { // Lw
                 regEnable.write(true);
                 regWrite.write(true);
                 dmEnable.write(true);
                 dmWrite.write(true);
                 regWrite.write(true);
                 state = 6;
-                
-            }else if(opcode == 8){// Sw
+            }
+            else if (opcode == 8)
+            { // Sw
                 dmEnable.write(true);
                 dmWrite.write(false);
                 regWrite.write(true);
                 state = 7;
-            }else if(opcode == 9){//J
+            }
+            else if (opcode == 9)
+            { // J
                 pcEnable.write(false);
                 pcjump.write(label);
                 restart = true;
                 state = 8;
-            }else if(opcode == 10){//bne
-                if(!zero.read()){
+            }
+            else if (opcode == 10)
+            { // bne
+                if (!zero.read())
+                {
                     pcEnable.write(false);
                     pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode == 11){//beq
-                if(zero.read()){
+            }
+            else if (opcode == 11)
+            { // beq
+                if (zero.read())
+                {
                     pcEnable.write(false);
                     pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
                 }
                 state = 8;
-            }else if(opcode > 0  && opcode < 7){//ALU
+            }
+            else if (opcode > 0 && opcode < 7)
+            { // ALU
                 regWrite.write(false);
                 regEnable.write(true);
                 regWrite.write(false);
@@ -147,35 +186,35 @@ SC_MODULE(Controller) {
             }
 
             break;
-            case 6: //LD STATE
-                regEnable.write(true);
-                regWrite.write(true);
-                state = 10;
+        case 6: // LD STATE
+            regEnable.write(true);
+            regWrite.write(true);
+            state = 10;
             break;
-            case 7: //ST STATE
-                dmEnable.write(true);
-                dmWrite.write(true);
-                state = 10;
-                break;
-            case 8:
-                state = 2;
-                break;
-            case 9:
-                regEnable.write(true);
-                regWrite.write(true);
-                state = 10;
-                break;
-            case 10:
-                regEnable.write(false);
-                regWrite.write(false);
-                break;
+        case 7: // ST STATE
+            dmEnable.write(true);
+            dmWrite.write(true);
+            state = 10;
+            break;
+        case 8:
+            state = 2;
+            break;
+        case 9:
+            regEnable.write(true);
+            regWrite.write(true);
+            state = 10;
+            break;
+        case 10:
+            regEnable.write(false);
+            regWrite.write(false);
+            break;
         default:
             break;
         }
-        
     }
 
-    SC_CTOR(Controller) {
+    SC_CTOR(Controller)
+    {
         SC_METHOD(updateState);
         sensitive << clk.pos();
     }

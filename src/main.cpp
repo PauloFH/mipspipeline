@@ -102,6 +102,7 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool> Controller_reset; // Controller
 	sc_signal<bool> ALU_Controller_zero; // ULA
 	sc_signal<sc_uint<16>> Controller_BufferIDEX_pcJump; // BufferIDEX
+	sc_signal<bool> Controller_BufferIDEX_Branch; // BufferIDEX
 	sc_signal<bool> Controller_BufferIDEX_pcLoad; // BufferIDEX
 	sc_signal<bool>	Controller_BufferIDEX_EnableDM; //BufferIDEX
 	sc_signal<bool>	Controller_BufferIDEX_WriteDM;//BufferIDEX
@@ -184,8 +185,9 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.dmWrite(Controller_BufferIDEX_WriteDM);
 	BufferIDEX.aluReset(Controller_BufferIDEX_resetALU);
 	BufferIDEX.aluOp(Controller_BufferIDEX_aluOp);
-	BufferIDEX.Branch()
 	BufferIDEX.memToReg(Controller_BufferIDEX_MemtoReg);
+	BufferIDEX.pcJump(Controller_BufferIDEX_pcJump);
+	BufferIDEX.Branch(Controller_BufferIDEX_Branch);
 
 
 
@@ -203,6 +205,7 @@ int sc_main(int arg, char* argv[]) {
 	Controller.dmWrite(Controller_BufferIDEX_WriteDM);
 	Controller.memToReg(Controller_BufferIDEX_MemtoReg);
 	Controller.pcjump(Controller_BufferIDEX_pcJump);
+	Controller.branch(Controller_BufferIDEX_Branch);
 	Controller.enable_BufferIDEX(Controller_BufferIDEX_EnableBufferIDEX);
 	Controller.write_BufferIDEX(Controller_BufferIDEX_WriteBufferIDEX);
 	Controller.reset_BufferIDEX(Controller_BufferIDEX_ResetBufferIDEX);
@@ -214,6 +217,7 @@ int sc_main(int arg, char* argv[]) {
 	Controller.reset_BufferMEMWB(Controller_BufferMEMWB_ResetBufferMEMWB);
 	Controller.aluOp(Controller_BufferIDEX_aluOp);
 	Controller.zero(ALU_Controller_zero);
+
 
 
 	sc_signal<bool> Controller_Registers_reset; // Controller
