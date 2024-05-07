@@ -4,8 +4,6 @@ SC_MODULE(BufferMEMWB) {
 
     sc_in<bool> RegWrite;
     sc_in<bool> clk;
-    sc_in<bool> reset;
-
     sc_in<bool> memReg;
     sc_in<sc_uint<6>> opDestino;
     sc_in<sc_int<32>> dataAdress;
@@ -25,14 +23,10 @@ SC_MODULE(BufferMEMWB) {
 
         SC_METHOD(readMemory);
         sensitive << clk.pos();
-        async_reset_signal_is(reset, true);
 
     }
 
     void readMemory() {
-        if (reset.read()) {
-           writeRegister.write(0x00000000); 
-        } else {
                 internoDataAdress = dataAdress.read();
                 internoOpDestino = opDestino.read();
                 internoReadData = readData.read();
@@ -41,6 +35,5 @@ SC_MODULE(BufferMEMWB) {
                 memRegOut.write(memReg); 
                 readDataOutput.write(readData);
                 dataAdressOutput.write(dataAdress);
-            }
         }
     };
