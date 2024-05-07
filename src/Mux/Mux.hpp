@@ -2,9 +2,9 @@
 
 SC_MODULE(Mux) {
     sc_in<bool> pcSRC; 
-    sc_in<sc_uint<9>> in0; 
-    sc_in<sc_uint<9>> in1; 
-    sc_out<sc_uint<9>> out; 
+    sc_in<sc_uint<16>> in0; 
+    sc_in<sc_uint<16>> in1; 
+    sc_out<sc_uint<16>> out; 
 
     void process() {
         if (pcSRC.read() == 0) {

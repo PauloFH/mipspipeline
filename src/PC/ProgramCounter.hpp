@@ -3,8 +3,12 @@
 SC_MODULE(ProgramCounter) {
     sc_in<bool> clk; 
     sc_in<sc_uint<16>> pcInput;
-    sc_in<bool> reset,  enable, load;
+    sc_in<bool> reset;
+    sc_in<bool>enable;
+    sc_in<bool>  load;
+    
     sc_out<sc_uint<16>> pcOutput;
+    
     sc_uint<16> currentInstruction;
 
     void counterIntruction() {
