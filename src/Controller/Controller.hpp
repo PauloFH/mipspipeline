@@ -157,7 +157,6 @@ SC_MODULE(Controller) {
                 state = 10;
                 break;
             case 8:
-                pcLoad.write(false);
                 state = 2;
                 break;
             case 9:
