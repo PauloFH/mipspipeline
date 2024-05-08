@@ -31,18 +31,15 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX BufferIDEX("BufferIDEX");
 
 	Controller Controller("Controller");
-/*
-	
-	
 
 	Alu ALU("ALU");
 
+	BufferEXMEM BufferEXMEM("BufferEXMEM");
+/*
 	DataMemory DM("DM");
-
 	MuxDM MuxDM("MuxDM");
 
-
-	BufferEXMEM BufferEXMEM("BufferEXMEM");
+	
 
 	BufferMEMWB BufferMEMWB("BufferMEMWB");
 */
@@ -96,6 +93,19 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool> Controller_BufferIDEX_reset; // Controller
 	sc_signal<bool> Controller_BufferIDEX_write; // Controller
 	sc_signal<bool> Controller_BufferIDEX_Reset; // Controller
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData1;
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData2;
+	sc_signal<sc_uint<6>> BufferIDEX_BufferEXMEM_destReg;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_Branch_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_memToReg_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_opcode_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_pc_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_label_j_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_pcLoad_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmEnable_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmWrite_output;
+	sc_signal<bool> BufferIDEX_ALU_aluReset_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_aluOp_output;
 
 	//Controller signals
 	
@@ -118,6 +128,13 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool>	Controller_BufferMEMWB_ResetBufferMEMWB; //BufferMEMWB
 	sc_signal<sc_uint<4>> Controller_BufferIDEX_aluOp; //Controller
 	sc_signal<bool> Controller_BufferIDEX_resetALU; //Controller
+
+	//ALU
+	sc_signal<bool> ALU_BufferEXMEM_zero;
+	sc_signal<sc_int<32>> ALU_Bufferexmem_result;
+
+	//BufferEXMEM
+
 
 
 
@@ -188,8 +205,23 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.memToReg(Controller_BufferIDEX_MemtoReg);
 	BufferIDEX.pcJump(Controller_BufferIDEX_pcJump);
 	BufferIDEX.Branch(Controller_BufferIDEX_Branch);
-
-
+	BufferIDEX.label_j(BufferIFID_BufferIDEX_label_j);
+	BufferIDEX.registerData1(Registers_BufferIDEX_readData1);
+	BufferIDEX.registerData2(Registers_BufferIDEX_readData2);
+	BufferIDEX.register1_Output(BufferIDEX_ALU_registerData1);
+	BufferIDEX.register2_Output(BufferIDEX_ALU_registerData2);
+	BufferIDEX.destReg(BufferIFID_BufferIDEX_Opdest);
+	BufferIDEX.opcode_Output(BufferIFID_Registers_opcode);
+	BufferIDEX.Branch_Output(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferIDEX.memToReg_Output(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_opcode_output);
+	BufferIDEX.pc_out(BufferIDEX_BufferEXMEM_pc_output);
+	BufferIDEX.label_j_out(BufferIDEX_BufferEXMEM_label_j_output);
+	BufferIDEX.pcLoad_out(BufferIDEX_BufferEXMEM_pcLoad_output);
+	BufferIDEX.dmEnable_out(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferIDEX.dmWrite_out(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferIDEX.aluReset_out(BufferIDEX_ALU_aluReset_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_aluOp_output);
 
 	Controller.clk(clk);
 	Controller.reset(Controller_reset);
@@ -218,15 +250,25 @@ int sc_main(int arg, char* argv[]) {
 	Controller.aluOp(Controller_BufferIDEX_aluOp);
 	Controller.zero(ALU_Controller_zero);
 
+	ALU.clk(clk);
+	ALU.reset(Controller_BufferIDEX_resetALU);
+	ALU.opcode(BufferIDEX_ALU_opcode_output);
+	ALU.first_value(BufferIDEX_ALU_registerData1);
+	ALU.second_value(BufferIDEX_ALU_registerData2);
+	ALU.zero(ALU_Controller_zero);
+	ALU.output_value(ALU_Bufferexmem_result);
+	ALU.zero(ALU_BufferEXMEM_zero);
+
+	BufferEXMEM.clk(clk);
+	BufferEXMEM
+	
 
 
-	sc_signal<bool> Controller_Registers_reset; // Controller
 
 
 
 
-
-
+	sc_start(100, SC_NS);
 
 	return 0;
 }

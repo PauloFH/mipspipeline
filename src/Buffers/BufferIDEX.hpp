@@ -6,6 +6,7 @@ SC_MODULE(BufferIDEX) {
     sc_in<bool>        enable;
     sc_in<bool>        write;
     sc_in<bool>        reset;
+    sc_in<sc_uint<4>>  opcode;
     // vem do Controller
     sc_in<bool>        pcLoad;
     sc_in <bool>       dmEnable;
@@ -14,14 +15,13 @@ SC_MODULE(BufferIDEX) {
     sc_in<sc_uint<4>>  aluOp;
     sc_in<bool>        Branch;
     sc_in<bool>        memToReg;
-     sc_in<sc_uint<4>>  opcode;
     sc_in<sc_uint<16>> pcJump;
     sc_in<sc_uint<16>> label_j;
 
     // vem do Registers
     sc_in<sc_int<32>>  registerData1;
     sc_in<sc_int<32>>  registerData2;
-    // vem do MuxDST
+    // vem do bufferifid
     sc_in<sc_uint<6>>  destReg;
 
     sc_out<sc_int<32>> register1_Output;
