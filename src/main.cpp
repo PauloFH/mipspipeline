@@ -44,14 +44,13 @@ int sc_main(int arg, char* argv[]) {
 
 //-----------------------------------------------------------------------------------------------
 	sc_signal<bool> clk;
-	sc_signal<bool> reset;
+
 	//pc signals
-	sc_signal<bool> Controller_PC_reset; //controller
-	sc_signal<bool> Controller_PC_enable; // controller
-	sc_signal<bool> BufferEXMEM_PCjump; // BufferEXMEM
-	sc_signal<sc_uint<16>> Mux_PC_loadAddrs;	// Mux
-	sc_signal<sc_uint<16>> PC_IM_pcOutput;// IM
-	sc_signal<sc_uint<16>> PC_Addr_pcOutput; // Addr
+	sc_signal<bool> Controller_PC_reset; //controller OK
+	sc_signal<bool> Controller_PC_enable; // controller OK
+	sc_signal<bool> BufferEXMEM_PCjump; // BufferEXMEM	OK
+	sc_signal<sc_uint<16>> Mux_PC_Addrs;	// Mux	OK
+	sc_signal<sc_uint<16>> PC_Addr_IM_pcOutput;// IM OK
 
 	//IM signals
 	sc_signal<bool> Controller_IM_enable; // controller
@@ -60,7 +59,7 @@ int sc_main(int arg, char* argv[]) {
 
 	//Addr signals
 	sc_signal<sc_uint<16>> Addr_MUX_op0; // Mux
-	sc_signal<sc_uint<16>> Addr_BufferIFID_address; // BufferIFID
+	sc_signal<sc_uint<16>> Addr_MUX_BufferIFID_address; // BufferIFID
 
 	//Mux signals
 	sc_signal<bool> Brach_Mux_pcSRC; // BufferEXMEM
@@ -160,32 +159,32 @@ int sc_main(int arg, char* argv[]) {
 //-----------------------------------------------------------------------------------------------
 
 	PC.clk(clk);
-	PC.reset(reset);
+	PC.reset(Controller_PC_reset);
 	PC.enable(Controller_PC_enable);
-	PC.pcInput(Mux_PC_loadAddrs);
-	PC.pcOutput(PC_IM_pcOutput);
-	PC.load(BufferIDEX_BufferEXMEM_pcLoad_output);
+	PC.pcInput(Mux_PC_Addrs);
+	PC.pcOutput(PC_Addr_IM_pcOutput);
+	PC.load(BufferEXMEM_PCjump);
 
 	IM.clk(clk);
 	IM.enable(Controller_IM_enable);
-	IM.address(PC_IM_pcOutput);
 	IM.write(Controller_IM_Write);
+	IM.address(PC_Addr_IM_pcOutput);
 	IM.instruction(IM_BufferIFID_instruction);
 
-	Addr.first_value(Addr_MUX_op0);
-	Addr.output_value(PC_Addr_pcOutput);
-	Addr.output_value(Addr_BufferIFID_address);
+	Addr.first_value(PC_Addr_IM_pcOutput);
+	Addr.output_value(Addr_MUX_BufferIFID_address);
 
-	Mux.in0(Mux_PC_loadAddrs);
+	Mux.in0(Addr_MUX_BufferIFID_address);
 	Mux.in1(BufferEXMEM_MUX_op1);
 	Mux.pcSRC(Brach_Mux_pcSRC);
+	Mux.out(Mux_PC_Addrs);
 
 	BufferIFID.clk(clk);
 	BufferIFID.enable(Controller_BufferIFID_enable);
 	BufferIFID.reset(Controller_BufferIFID_reset);
 	BufferIFID.write(Controller_BufferIFID_write);
 	BufferIFID.instruction(IM_BufferIFID_instruction);
-	BufferIFID.Address_Addr(Addr_BufferIFID_address);
+	BufferIFID.Address_Addr(Addr_MUX_BufferIFID_address);
 	BufferIFID.Address_Addr_Out(BufferIFID_BufferIDEX_address);
 	BufferIFID.instruction_out(BufferIFID_Controller_instruction);
 	BufferIFID.readRegister1(BufferIFID_Registers_readRegister1);
@@ -213,6 +212,9 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.enable(Controller_BufferIDEX_enable);
 	BufferIDEX.reset(Controller_BufferIDEX_reset);
 	BufferIDEX.write(Controller_BufferIDEX_write);
+
+	BufferIDEX.pcLoad_out(BufferIDEX_BufferEXMEM_pcLoad_output);
+
 	BufferIDEX.opcode(BufferIFID_Registers_opcode);
 	BufferIDEX.pcLoad(Controller_BufferIDEX_pcLoad);
 	BufferIDEX.dmEnable(Controller_BufferIDEX_EnableDM);
@@ -234,7 +236,6 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.aluOp_out(BufferIDEX_ALU_opcode_output);
 	BufferIDEX.pc_out(BufferIDEX_BufferEXMEM_pc_output);
 	BufferIDEX.label_j_out(BufferIDEX_BufferEXMEM_label_j_output);
-	BufferIDEX.pcLoad_out(BufferIDEX_BufferEXMEM_pcLoad_output);
 	BufferIDEX.dmEnable_out(BufferIDEX_BufferEXMEM_dmEnable_output);
 	BufferIDEX.dmWrite_out(BufferIDEX_BufferEXMEM_dmWrite_output);
 	BufferIDEX.aluReset_out(BufferIDEX_ALU_aluReset_output);
@@ -296,15 +297,12 @@ int sc_main(int arg, char* argv[]) {
 	BufferEXMEM.zero(ALU_BufferEXMEM_zero);
 	BufferEXMEM.ALU_result(ALU_Bufferexmem_result);
 	BufferEXMEM.label_j_out(BufferEXMEM_MUX_op1);
-	
-
-	
-	
-
 	BufferEXMEM.regWrite_Output(BufferEXMEM_BufferMEMWB_RegWrite);
 	BufferEXMEM.MemReg_Output(BufferEXMEM_BufferMEMWB_MemReg);
 	BufferEXMEM.pcLoad(BufferIDEX_BufferEXMEM_pcLoad_output);
 	BufferEXMEM.opdest_Out(BufferEXMEM_BufferMEMWB_Opdest);
+
+	BufferEXMEM.pcLoadOut(BufferIDEX_BufferEXMEM_pcLoad_output);
 	BufferEXMEM.BranchOUT(Brach_Mux_pcSRC);
 	BufferEXMEM.DMenableOUT(BufferEXMEM_DataMemory_DMenable);
 	BufferEXMEM.DMWriteOUT(BufferEXMEM_DataMemory_DMWrite);
