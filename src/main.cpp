@@ -31,18 +31,15 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX BufferIDEX("BufferIDEX");
 
 	Controller Controller("Controller");
-/*
-	
-	
 
 	Alu ALU("ALU");
 
+	BufferEXMEM BufferEXMEM("BufferEXMEM");
+/*
 	DataMemory DM("DM");
-
 	MuxDM MuxDM("MuxDM");
 
-
-	BufferEXMEM BufferEXMEM("BufferEXMEM");
+	
 
 	BufferMEMWB BufferMEMWB("BufferMEMWB");
 */
@@ -52,6 +49,7 @@ int sc_main(int arg, char* argv[]) {
 	//pc signals
 	sc_signal<bool> Controller_PC_reset; //controller
 	sc_signal<bool> Controller_PC_enable; // controller
+	sc_signal<bool> BufferEXMEM_PCjump; // BufferEXMEM
 	sc_signal<sc_uint<16>> Mux_PC_loadAddrs;	// Mux
 	sc_signal<sc_uint<16>> PC_IM_pcOutput;// IM
 	sc_signal<sc_uint<16>> PC_Addr_pcOutput; // Addr
@@ -84,7 +82,7 @@ int sc_main(int arg, char* argv[]) {
 
 	//Registers signals
 	sc_signal<bool> Controller_Registers_enable; // Controller
-	sc_signal<bool> Controller_Registers_RegWrite; // Controller
+	sc_signal<bool> BufferMEMWB_Registers_RegWrite; // Controller
 	sc_signal<bool> Controller_Registers_reset; // Controller
 	sc_signal<sc_uint<6>> BufferMEMWB_Registers_writeRegister; // BufferMEMWB
 	sc_signal<sc_int<32>> MUXDM_Registers_writeData; //   MuxDM
@@ -96,6 +94,21 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool> Controller_BufferIDEX_reset; // Controller
 	sc_signal<bool> Controller_BufferIDEX_write; // Controller
 	sc_signal<bool> Controller_BufferIDEX_Reset; // Controller
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData1;
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData2;
+	sc_signal<sc_uint<6>> BufferIDEX_BufferEXMEM_destReg;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_Branch_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_memToReg_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_opcode_output;
+	sc_signal<sc_uint<4>> BufferIDEX_BufferEXMEM_opcode_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_pc_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_label_j_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_pcLoad_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmEnable_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmWrite_output;
+	sc_signal<bool> BufferIDEX_ALU_aluReset_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_aluOp_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_RegWrite;
 
 	//Controller signals
 	
@@ -118,6 +131,22 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool>	Controller_BufferMEMWB_ResetBufferMEMWB; //BufferMEMWB
 	sc_signal<sc_uint<4>> Controller_BufferIDEX_aluOp; //Controller
 	sc_signal<bool> Controller_BufferIDEX_resetALU; //Controller
+	sc_signal<bool>Controller_BufferIDEX_RegWrite;
+	//ALU
+	sc_signal<bool> ALU_BufferEXMEM_zero;
+	sc_signal<sc_int<32>> ALU_Bufferexmem_result;
+
+	//BufferEXMEM
+	sc_signal<bool> BufferEXMEM_DataMemory_DMenable;
+	sc_signal<bool> BufferEXMEM_DataMemory_DMWrite;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_MemReg;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_RegWrite;
+	sc_signal<sc_int<32>>BufferEXMEM_DataMemory_WriteData;
+	sc_signal<sc_uint<22>> BufferEXMEM_BufferIDEX_address;
+	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_Opdest;
+	sc_signal<bool>BufferEXMEM_MUX_branch;
+
+
 
 
 
@@ -164,7 +193,7 @@ int sc_main(int arg, char* argv[]) {
 
 	RegistersData.clk(clk);
 	RegistersData.enable(Controller_Registers_enable);
-	RegistersData.RegWrite(Controller_Registers_RegWrite);
+	RegistersData.RegWrite(BufferMEMWB_Registers_RegWrite);
 	RegistersData.opcode(BufferIFID_Registers_opcode);
 	RegistersData.writeRegister(BufferMEMWB_Registers_writeRegister);
 	RegistersData.writeData(MUXDM_Registers_writeData);
@@ -188,7 +217,26 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.memToReg(Controller_BufferIDEX_MemtoReg);
 	BufferIDEX.pcJump(Controller_BufferIDEX_pcJump);
 	BufferIDEX.Branch(Controller_BufferIDEX_Branch);
-
+	BufferIDEX.label_j(BufferIFID_BufferIDEX_label_j);
+	BufferIDEX.registerData1(Registers_BufferIDEX_readData1);
+	BufferIDEX.registerData2(Registers_BufferIDEX_readData2);
+	BufferIDEX.register1_Output(BufferIDEX_ALU_registerData1);
+	BufferIDEX.register2_Output(BufferIDEX_ALU_registerData2);
+	BufferIDEX.destReg(BufferIFID_BufferIDEX_Opdest);
+	BufferIDEX.opcode_Output(BufferIFID_Registers_opcode);
+	BufferIDEX.Branch_Output(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferIDEX.memToReg_Output(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_opcode_output);
+	BufferIDEX.pc_out(BufferIDEX_BufferEXMEM_pc_output);
+	BufferIDEX.label_j_out(BufferIDEX_BufferEXMEM_label_j_output);
+	BufferIDEX.pcLoad_out(BufferIDEX_BufferEXMEM_pcLoad_output);
+	BufferIDEX.dmEnable_out(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferIDEX.dmWrite_out(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferIDEX.aluReset_out(BufferIDEX_ALU_aluReset_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_aluOp_output);
+	BufferIDEX.opcode_Output(BufferIDEX_BufferEXMEM_opcode_output);
+	BufferIDEX.regWrite(Controller_BufferIDEX_RegWrite);
+	BufferIDEX.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
 
 
 	Controller.clk(clk);
@@ -198,7 +246,7 @@ int sc_main(int arg, char* argv[]) {
 	Controller.PcLoad(Controller_BufferIDEX_pcLoad);
 	Controller.pcReset(Controller_PC_reset);
 	Controller.regEnable(Controller_Registers_enable);
-	Controller.regWrite(Controller_Registers_RegWrite);
+	Controller.regWrite(Controller_BufferIDEX_RegWrite);
 	Controller.imEnable(Controller_IM_enable);
 	Controller.imwrite(Controller_IM_Write);
 	Controller.dmEnable(Controller_BufferIDEX_EnableDM);
@@ -218,15 +266,43 @@ int sc_main(int arg, char* argv[]) {
 	Controller.aluOp(Controller_BufferIDEX_aluOp);
 	Controller.zero(ALU_Controller_zero);
 
+	ALU.clk(clk);
+	ALU.reset(Controller_BufferIDEX_resetALU);
+	ALU.opcode(BufferIDEX_ALU_opcode_output);
+	ALU.first_value(BufferIDEX_ALU_registerData1);
+	ALU.second_value(BufferIDEX_ALU_registerData2);
+	ALU.zero(ALU_Controller_zero);
+	ALU.output_value(ALU_Bufferexmem_result);
+	ALU.zero(ALU_BufferEXMEM_zero);
+
+	BufferEXMEM.clk(clk);
+	BufferEXMEM.reset(Controller_BufferEXMEM_ResetBufferEXMEM);
+	BufferEXMEM.enable(Controller_BufferEXMEM_enableBufferEXMEM);
+	BufferEXMEM.write(Controller_BufferEXMEM_WriteBufferEXMEM);
+	BufferEXMEM.reset(Controller_BufferEXMEM_ResetBufferEXMEM);
+	BufferEXMEM.zero(ALU_BufferEXMEM_zero);
+	BufferEXMEM.MemReg(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferEXMEM.opcode(BufferIDEX_BufferEXMEM_opcode_output);
+	BufferEXMEM.ALU_result(ALU_Bufferexmem_result);
+	BufferEXMEM.label_j_out(BufferEXMEM_MUX_op1);
+	BufferEXMEM.opdest(BufferIDEX_BufferEXMEM_destReg);
+	BufferEXMEM.Branch(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferEXMEM.DMenable(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferEXMEM.DMWrite(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferEXMEM.regWrite(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferEXMEM.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferEXMEM.MemReg_Output(BufferEXMEM_BufferMEMWB_MemReg);
+	BufferEXMEM.pcLoad(BufferIDEX_BufferEXMEM_pcLoad_output);
 
 
-	sc_signal<bool> Controller_Registers_reset; // Controller
+	
 
 
 
 
 
 
+	sc_start(100, SC_NS);
 
 	return 0;
 }
