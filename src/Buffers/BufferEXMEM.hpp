@@ -33,9 +33,8 @@ SC_MODULE(BufferEXMEM) {
     sc_in<sc_uint<6>> opdest;
     sc_in<bool> zero;
     sc_in<bool> pcLoad;
-
     sc_in<sc_int<32>> ALU_result;
-   
+    sc_in<sc_int<32>> dataDM;
     sc_in<sc_uint<16>> label_j;
     
    
@@ -48,11 +47,13 @@ SC_MODULE(BufferEXMEM) {
     sc_out<bool>BranchOUT;
     sc_out<bool> pcLoadOut;
     sc_out<sc_uint<6>> opdest_Out;
-    
+    sc_out<sc_int<32>> dataDMOut;
     sc_uint<6> Intern_opdest;
     sc_int<32> Intern_ALU_result;
     sc_uint<4> Intern_opcode;
     sc_uint<16> Intern_label_j;
+    sc_int<32> Intern_dataDM;
+
 
 
     void bufferEXMEM() {
@@ -62,6 +63,7 @@ SC_MODULE(BufferEXMEM) {
             Intern_label_j = 0;
             Intern_opdest = 0;
             Intern_opcode = 0;
+            Intern_dataDM = 0;
             ALU_result_Out.write(Intern_ALU_result);
             label_j_out.write(Intern_label_j);
             opdest_Out.write(Intern_opdest);
@@ -70,6 +72,10 @@ SC_MODULE(BufferEXMEM) {
             regWrite_Output.write(0);
             MemReg_Output.write(0);
             BranchOUT.write(0);
+            pcLoadOut.write(0);
+            dataDMOut.write(Intern_dataDM);
+
+
         }else
          if (enable.read()) {
             Intern_opcode = opcode.read();
@@ -96,6 +102,7 @@ SC_MODULE(BufferEXMEM) {
                 pcLoadOut.write(false);
             }
             if(write.read()){
+            Intern_dataDM = dataDM.read();
             Intern_ALU_result = ALU_result.read();
             Intern_label_j = label_j.read();
             Intern_opdest = opdest.read();
@@ -114,6 +121,7 @@ SC_MODULE(BufferEXMEM) {
             DMenableOUT.write(DMenable.read());
             regWrite_Output.write(regWrite.read());
             MemReg_Output.write(MemReg.read());
+            dataDMOut.write(Intern_dataDM);
             }
             }
         }

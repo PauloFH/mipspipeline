@@ -8,6 +8,7 @@ SC_MODULE(Registers)
     sc_in<bool> RegWrite;
     sc_in<bool> enable;
     sc_in<sc_uint<4>> opcode;
+    sc_in<sc_uint<6>> destReg;
     sc_in<sc_uint<6>> writeRegister;
     sc_in<sc_int<32>> writeData;
     sc_in<sc_uint<6>> readRegister1;
@@ -15,9 +16,10 @@ SC_MODULE(Registers)
     sc_in<sc_int<16>> immediate;
     sc_out<sc_int<32>> readData1;
     sc_out<sc_int<32>> readData2;
+    sc_out<sc_int<32>> writeDataOut;
     sc_int<32> Intern_immediate;
     sc_int<32> registers[NUM_REGISTERS];
-
+    sc_int<32> readData1_intern, readData2_intern;
     void writeRegistrator()
     {
         if (enable.read())
@@ -39,6 +41,21 @@ SC_MODULE(Registers)
                 readData1.write(registers[readRegister1.read()]);
                 Intern_immediate = immediate.read();
                 readData2.write(Intern_immediate);
+            }
+            else if(opcode.read() == 0b1001){
+                
+              readData1_intern = readRegister1.read();
+                Intern_immediate = immediate.read();
+                readData1.write(readData1_intern);
+                readData2.write(Intern_immediate);
+            }
+            else if(opcode.read() == 0b1010){
+                readData1_intern = readRegister1.read();
+                Intern_immediate = immediate.read();
+                readData1.write(readData1_intern);
+                readData2.write(Intern_immediate);
+                writeDataOut.write(registers[destReg.read()]);
+                
             }
             else
             {

@@ -65,7 +65,7 @@ SC_MODULE(Controller)
     // Sinais do ALU
     sc_out<sc_uint<4>> aluOp;
     sc_out<bool> aluReset;
-
+    sc_out<sc_uint<22>> addressOut;
     // locais
     sc_uint<32> label;
     sc_uint<4> opcode;
@@ -99,7 +99,7 @@ SC_MODULE(Controller)
         opd = instruction.read().range(27, 22);
         op1 = instruction.read().range(21, 16);
         op2 = instruction.read().range(15, 0);
-
+       
         if (opcode == beq_op)
         {
             branch.write(true);
@@ -107,6 +107,10 @@ SC_MODULE(Controller)
         else if(opcode == bne_op)
         {
             branch.write(false);
+        }
+        if(opcode == lw_op || opcode == sw_op)
+        {
+              addressOut.write(instruction.read().range(21, 0));
         }
         switch (state)
         {
