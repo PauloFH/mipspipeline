@@ -23,7 +23,8 @@ SC_MODULE(BufferIDEX) {
     sc_in<sc_int<32>>  registerData2;
     // vem do bufferifid
     sc_in<sc_uint<6>>  destReg;
-
+    sc_in<sc_int<32>> dataDM;
+    sc_out<sc_int<32>> dataDMout;
     sc_out<sc_int<32>> register1_Output;
     sc_out<sc_int<32>> register2_Output;
     
@@ -49,6 +50,7 @@ SC_MODULE(BufferIDEX) {
     sc_uint<6> Intern_destReg;
     sc_int<32> Intern_register1;
     sc_int<32> Intern_register2;
+    sc_int<32> Intern_dataDM;
     bool Intern_pcLoad;
     bool Intern_dmEnable;
     bool Intern_dmWrite;
@@ -75,6 +77,7 @@ SC_MODULE(BufferIDEX) {
             Intern_opcode = 0;
             Intern_pc = 0;
             Intern_label_j = 0;
+            Intern_dataDM = 0;
             register1_Output.write(Intern_register1);
             register2_Output.write(Intern_register2);
             destReg_Output.write(Intern_destReg);
@@ -88,6 +91,7 @@ SC_MODULE(BufferIDEX) {
             dmWrite_out.write(Intern_dmWrite);
             aluReset_out.write(Intern_aluReset);
             aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
 
         } else {
          if (enable.read()) {
@@ -105,6 +109,7 @@ SC_MODULE(BufferIDEX) {
                 Intern_dmWrite = dmWrite.read();
                 Intern_aluReset = aluReset.read();
                 Intern_aluOp = aluOp.read();
+                Intern_dataDM = dataDM.read();
             }  
             register1_Output.write(Intern_register1);
             register2_Output.write(Intern_register2);
@@ -119,6 +124,7 @@ SC_MODULE(BufferIDEX) {
             dmWrite_out.write(Intern_dmWrite);
             aluReset_out.write(Intern_aluReset);
             aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
 
 
             }else{
@@ -135,6 +141,7 @@ SC_MODULE(BufferIDEX) {
             dmWrite_out.write(Intern_dmWrite);
             aluReset_out.write(Intern_aluReset);
             aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
             }
         }
     }

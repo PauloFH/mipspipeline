@@ -35,14 +35,13 @@ int sc_main(int arg, char* argv[]) {
 	Alu ALU("ALU");
 
 	BufferEXMEM BufferEXMEM("BufferEXMEM");
-/*
-	DataMemory DM("DM");
-	MuxDM MuxDM("MuxDM");
 
-	
+	DataMemory DM("DM");
 
 	BufferMEMWB BufferMEMWB("BufferMEMWB");
-*/
+
+	MuxDM MuxDM("MuxDM");
+
 //-----------------------------------------------------------------------------------------------
 	sc_signal<bool> clk;
 	sc_signal<bool> reset;
@@ -74,6 +73,7 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_uint<32>> BufferIFID_Controller_instruction; // Controller
 	sc_signal<sc_uint<16>> BufferIFID_BufferIDEX_address; // BufferIDEX
 	sc_signal<sc_uint<6>> BufferIFID_BufferIDEX_Opdest; // BufferIDEX
+	sc_signal<sc_uint<6>> BufferIFID_Registers_Opdest;
 	sc_signal<sc_uint<6>> BufferIFID_Registers_readRegister1; // Registers
 	sc_signal<sc_uint<6>> BufferIFID_Registers_readRegister2; // Registers
 	sc_signal<sc_int<16>> BufferIFID_Registers_immediate; // Registers
@@ -88,6 +88,8 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_int<32>> MUXDM_Registers_writeData; //   MuxDM
 	sc_signal<sc_int<32>> Registers_BufferIDEX_readData1; // BufferIDEX
 	sc_signal<sc_int<32>> Registers_BufferIDEX_readData2; // BufferIDEX
+	sc_signal<sc_int<32>> Registers_BufferIDEX_writeDataOut; // Registers
+	
 
 	//BufferIDEX signals
 	sc_signal<bool> Controller_BufferIDEX_enable; // Controller
@@ -109,6 +111,7 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool> BufferIDEX_ALU_aluReset_output;
 	sc_signal<sc_uint<4>> BufferIDEX_ALU_aluOp_output;
 	sc_signal<bool> BufferIDEX_BufferEXMEM_RegWrite;
+	sc_signal<sc_int<32>> BufferIDEX_BufferEXMEM_dataDM;
 
 	//Controller signals
 	
@@ -142,14 +145,15 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<bool> BufferEXMEM_BufferMEMWB_MemReg;
 	sc_signal<bool> BufferEXMEM_BufferMEMWB_RegWrite;
 	sc_signal<sc_int<32>>BufferEXMEM_DataMemory_WriteData;
-	sc_signal<sc_uint<22>> BufferEXMEM_BufferIDEX_address;
 	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_Opdest;
-	sc_signal<bool>BufferEXMEM_MUX_branch;
+	sc_signal<sc_int<32>> BufferEXMEM_BufferMEMWB_address;
 
+	//DataMemory
+	sc_signal<sc_int<32>> DataMemory_BufferMEMWB_ReadData;
 
-
-
-
+	sc_signal<bool> BufferMEMWB_MUXDM_memtoreg;
+	sc_signal<sc_int<32>> BufferMEMWB_muxDM_readDataOutput;
+	sc_signal<sc_int<32>> BufferMEMWB_muxDM_dataAdressOutput;
 
 
 
@@ -161,6 +165,7 @@ int sc_main(int arg, char* argv[]) {
 	PC.enable(Controller_PC_enable);
 	PC.pcInput(Mux_PC_loadAddrs);
 	PC.pcOutput(PC_IM_pcOutput);
+	PC.load(BufferIDEX_BufferEXMEM_pcLoad_output);
 
 	IM.clk(clk);
 	IM.enable(Controller_IM_enable);
@@ -202,7 +207,8 @@ int sc_main(int arg, char* argv[]) {
 	RegistersData.immediate(BufferIFID_Registers_immediate);
 	RegistersData.readData1(Registers_BufferIDEX_readData1);
 	RegistersData.readData2(Registers_BufferIDEX_readData2);
-
+	RegistersData.destReg(BufferIFID_Registers_Opdest);
+	RegistersData.writeDataOut(Registers_BufferIDEX_writeDataOut);
 
 	BufferIDEX.clk(clk);
 	BufferIDEX.enable(Controller_BufferIDEX_enable);
@@ -237,6 +243,8 @@ int sc_main(int arg, char* argv[]) {
 	BufferIDEX.opcode_Output(BufferIDEX_BufferEXMEM_opcode_output);
 	BufferIDEX.regWrite(Controller_BufferIDEX_RegWrite);
 	BufferIDEX.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferIDEX.dataDM(Registers_BufferIDEX_writeDataOut);
+	BufferIDEX.dataDMout(BufferIDEX_BufferEXMEM_dataDM);
 
 
 	Controller.clk(clk);
@@ -289,13 +297,43 @@ int sc_main(int arg, char* argv[]) {
 	BufferEXMEM.Branch(BufferIDEX_BufferEXMEM_Branch_output);
 	BufferEXMEM.DMenable(BufferIDEX_BufferEXMEM_dmEnable_output);
 	BufferEXMEM.DMWrite(BufferIDEX_BufferEXMEM_dmWrite_output);
-	BufferEXMEM.regWrite(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferEXMEM.regWrite(BufferEXMEM_BufferMEMWB_RegWrite);
 	BufferEXMEM.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
 	BufferEXMEM.MemReg_Output(BufferEXMEM_BufferMEMWB_MemReg);
 	BufferEXMEM.pcLoad(BufferIDEX_BufferEXMEM_pcLoad_output);
+	BufferEXMEM.opdest_Out(BufferEXMEM_BufferMEMWB_Opdest);
+	BufferEXMEM.BranchOUT(Brach_Mux_pcSRC);
+	BufferEXMEM.DMenableOUT(BufferEXMEM_DataMemory_DMenable);
+	BufferEXMEM.DMWriteOUT(BufferEXMEM_DataMemory_DMWrite);
+	BufferEXMEM.ALU_result_Out(BufferEXMEM_DataMemory_WriteData);
+	BufferEXMEM.dataDM(BufferIDEX_BufferEXMEM_dataDM);
+	BufferEXMEM.ALU_result_Out(BufferEXMEM_BufferMEMWB_address);
 
+	DM.clk(clk);
+	DM.memWrite(BufferEXMEM_DataMemory_DMWrite);
+	DM.enable(BufferEXMEM_DataMemory_DMenable);
+	DM.write_data(BufferIDEX_BufferEXMEM_dataDM);
+	DM.address(BufferEXMEM_DataMemory_WriteData);
+	DM.readData(DataMemory_BufferMEMWB_ReadData);
 
-	
+	BufferMEMWB.clk(clk);
+	BufferMEMWB.RegWrite(BufferEXMEM_BufferMEMWB_RegWrite);
+	BufferMEMWB.memReg(BufferEXMEM_BufferMEMWB_MemReg);
+	BufferMEMWB.opDestino(BufferEXMEM_BufferMEMWB_Opdest);
+	BufferMEMWB.dataAdress(BufferEXMEM_BufferMEMWB_address);
+	BufferMEMWB.readData(DataMemory_BufferMEMWB_ReadData);
+	BufferMEMWB.regWriteOutput(BufferMEMWB_Registers_RegWrite);
+	BufferMEMWB.writeRegister(BufferMEMWB_Registers_writeRegister);
+	BufferMEMWB.memRegOut(BufferMEMWB_MUXDM_memtoreg);
+	BufferMEMWB.readDataOutput(BufferMEMWB_muxDM_readDataOutput);
+	BufferMEMWB.dataAdressOutput(BufferMEMWB_muxDM_dataAdressOutput);
+
+	MuxDM.memReg(BufferMEMWB_MUXDM_memtoreg);
+	MuxDM.in0(BufferMEMWB_muxDM_readDataOutput);
+	MuxDM.in1(BufferMEMWB_muxDM_dataAdressOutput);
+	MuxDM.out(MUXDM_Registers_writeData);
+
+//-----------------------------------------------------------------------------------------------
 
 
 

@@ -44,7 +44,7 @@ SC_MODULE(BufferIFID) {
             Intern_Address_Addr = Address_Addr.read();
             Intern_instruction = instruction.read();
             Intern_opcode = Intern_instruction.range(31, 28);
-
+    
             //beq/bne
             if(Intern_opcode == beq_op || Intern_opcode == bne_op){
                 Intern_readRegister1 =  Intern_instruction.range(27, 22);
@@ -58,7 +58,7 @@ SC_MODULE(BufferIFID) {
                 Intern_label_j = Intern_instruction.range(15, 0);
             }else
 
-            if(Intern_opcode == addi_op){
+            if(Intern_opcode == addi_op|| Intern_opcode == lw_op || Intern_opcode == sw_op){
                 Intern_readRegister2 =  0b000000;
                 Intern_DestReg_out =  Intern_instruction.range(27, 22);
                 Intern_readRegister1 =  Intern_instruction.range(21, 16);

@@ -10,7 +10,6 @@ SC_MODULE(Alu){
     sc_in <sc_int<32>> first_value,second_value;
     sc_out <sc_int<32>> output_value;
 	sc_out <bool> zero;
-	
     sc_int<32> internDataA, internDataB, internResult;
 
     void aluOperation(){
@@ -63,6 +62,11 @@ SC_MODULE(Alu){
 					}else{
 						zero.write(false);
 					}
+					break;
+				case lw_op:
+				case sw_op:
+					internResult = internDataA + internDataB;
+					output_value.write(internResult);
 					break;
 			}
 		}

@@ -9,7 +9,7 @@ SC_MODULE(DataMemory) {
     sc_in<sc_int<32>> write_data; 
     sc_in<sc_int<32>> address; 
     sc_out<sc_int<32>> readData;
-
+    
     sc_uint<16> internoAdress; 
 
     sc_int<32> memory[MEMORY_SIZE];
