@@ -25,8 +25,14 @@ Nosso modelo de instrução  é modelado como:
 |--------|------------|-------------|----------------------------|
 | 4 bits | 6 bits | 6 bits | 16 bits|
 
+#### Para executar, siga as instruções do template chamar ./main nomedoarquivo
 
- #
+## Diagrama
+
+![Diagrama pipeline](Resources/images/mipsPipeLine.drawio.png "Diagrama de blocos do processador")
+ 
+
+ # 
 # Detalhes do trabalho
 
 ### 1. PARTE OPERATIVA

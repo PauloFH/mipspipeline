@@ -17,7 +17,7 @@ SC_MODULE(BufferIDEX) {
     sc_in<bool>        memToReg;
     sc_in<sc_uint<16>> pcJump;
     sc_in<sc_uint<16>> label_j;
-
+    sc_in<bool>        regWrite;
     // vem do Registers
     sc_in<sc_int<32>>  registerData1;
     sc_in<sc_int<32>>  registerData2;
@@ -28,9 +28,10 @@ SC_MODULE(BufferIDEX) {
     sc_out<sc_int<32>> register2_Output;
     
     sc_out<sc_uint<6>> destReg_Output;
-
+    sc_out<bool>regWrite_Output;
     sc_out<bool> Branch_Output;
     sc_out<bool> memToReg_Output;
+    
     sc_out<sc_uint<4>> opcode_Output;
     sc_out<sc_uint<16>> pc_out;
     sc_out<sc_uint<16>> label_j_out;
