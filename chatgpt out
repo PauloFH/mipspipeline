@@ -1,0 +1,1620 @@
+rapaz, estou terminando o projeto do pipeline fazendo a integração da main os sinais de entrada e saída do programa para visalizar que está funcionando.
+vou mandar como ficou todos os códigos e quando eu mandar a main, você me ajudará a corrigir os fios errados e como executar ele completo.
+meus códigos são:
+
+addr.hpp:
+
+#include <systemc.h>
+
+
+SC_MODULE(Addr){
+    sc_in <sc_uint<16>> first_value;
+    sc_out<sc_uint<16>> output_value;
+    
+    void addr(){
+        output_value.write(first_value.read() + 1);
+    }
+
+    SC_CTOR(Addr){
+        SC_METHOD(addr);
+        sensitive << first_value;
+    }
+
+};
+Alu.hpp:
+
+#include <systemc.h>
+
+
+
+SC_MODULE(Alu){
+	 enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
+	sc_in <bool> clk;
+	sc_in <bool> reset;
+	sc_in <sc_uint<4>> opcode;
+    sc_in <sc_int<32>> first_value,second_value;
+    sc_out <sc_int<32>> output_value;
+	sc_out <bool> zero;
+    sc_int<32> internDataA, internDataB, internResult;
+
+    void aluOperation(){
+
+        internDataA = first_value.read();
+        internDataB = second_value.read();
+		if(reset.read()){
+			        zero = false;
+		}else{
+       		switch(opcode.read()){
+				case and_op:
+					internResult = internDataA & internDataB;
+					output_value.write(internResult);
+					break;
+				case or_op:
+					internResult = internDataA | internDataB;
+					output_value.write(internResult);
+					break;					
+				case xor_op:
+					internResult = internDataA ^ internDataB;
+					output_value.write(internResult);
+					break;
+				case not_op:
+					internResult = ~internDataA;
+					output_value.write(internResult);
+					break;
+				case slt_op:
+					internResult = internDataA - internDataB;
+						if(internResult == 0){
+							zero.write(true);
+							
+						}else{
+							zero.write(false);
+						}
+					output_value.write(internResult);
+					break;
+				case add_op:
+				case addi_op:
+					internResult = internDataA + internDataB;
+					output_value.write(internResult);
+					break;
+				case sub_op:
+					internResult = internDataA - internDataB;
+					output_value.write(internResult);
+					break;
+				case beq_op:
+				case bne_op:
+					if(internDataA == internDataB){
+						zero.write(true);
+					}else{
+						zero.write(false);
+					}
+					break;
+				case lw_op:
+				case sw_op:
+					internResult = internDataA + internDataB;
+					output_value.write(internResult);
+					break;
+			}
+		}
+        
+    }
+		SC_CTOR(Alu){
+			SC_METHOD(aluOperation);
+				sensitive << opcode << first_value << second_value << reset;
+		}
+
+};
+
+BufferEXMEM.hpp:
+
+#include <systemc.h>
+
+SC_MODULE(BufferEXMEM) {
+        enum OpC
+    {
+        zero_op = 0b0000,
+        and_op = 0b0001,
+        or_op = 0b0010,
+        xor_op = 0b0011,
+        not_op = 0b0100,
+        slt_op = 0b0101,
+        cmp_op = 0b0101,
+        add_op = 0b0110,
+        addi_op = 0b0111,
+        sub_op = 0b1000,
+        lw_op = 0b1001,
+        sw_op = 0b1010,
+        j_op = 0b1011,
+        beq_op = 0b1100,
+        bne_op = 0b1101
+    };
+
+    sc_in<bool> clk;
+    sc_in<bool> reset;
+    sc_in<bool> enable;
+    sc_in<bool> write;
+    sc_in<bool> MemReg;
+    sc_in<bool>regWrite;
+    sc_in<sc_uint<4>> opcode;
+    sc_in<bool>DMWrite;
+    sc_in<bool>DMenable;
+    sc_in<bool>Branch;
+    sc_in<sc_uint<6>> opdest;
+    sc_in<bool> zero;
+    sc_in<bool> pcLoad;
+    sc_in<sc_int<32>> ALU_result;
+    sc_in<sc_int<32>> dataDM;
+    sc_in<sc_uint<16>> label_j;
+    
+   
+    sc_out<sc_int<32>> ALU_result_Out;
+    sc_out<sc_uint<16>> label_j_out;
+    sc_out<bool>DMWriteOUT;
+    sc_out<bool>DMenableOUT;
+    sc_out<bool>regWrite_Output;
+    sc_out<bool>MemReg_Output;
+    sc_out<bool>BranchOUT;
+    sc_out<bool> pcLoadOut;
+    sc_out<sc_uint<6>> opdest_Out;
+    sc_out<sc_int<32>> dataDMOut;
+    sc_uint<6> Intern_opdest;
+    sc_int<32> Intern_ALU_result;
+    sc_uint<4> Intern_opcode;
+    sc_uint<16> Intern_label_j;
+    sc_int<32> Intern_dataDM;
+
+
+
+    void bufferEXMEM() {
+       
+        if (reset.read() == true) {
+            Intern_ALU_result = 0;
+            Intern_label_j = 0;
+            Intern_opdest = 0;
+            Intern_opcode = 0;
+            Intern_dataDM = 0;
+            ALU_result_Out.write(Intern_ALU_result);
+            label_j_out.write(Intern_label_j);
+            opdest_Out.write(Intern_opdest);
+            DMWriteOUT.write(0);
+            DMenableOUT.write(0);
+            regWrite_Output.write(0);
+            MemReg_Output.write(0);
+            BranchOUT.write(0);
+            pcLoadOut.write(0);
+            dataDMOut.write(Intern_dataDM);
+
+
+        }else
+         if (enable.read()) {
+            Intern_opcode = opcode.read();
+            if(Intern_opcode == j_op){
+                BranchOUT.write(true);
+                pcLoadOut.write(true);
+            }else if(Intern_opcode == beq_op){
+                if(zero.read()){
+                    BranchOUT.write(true);
+                    pcLoadOut.write(true);
+            }else{
+                BranchOUT.write(false);
+            
+            }}
+            else if(Intern_opcode == bne_op){
+                if(!zero.read()){
+                    BranchOUT.write(true);
+                    pcLoadOut.write(true);
+                }else{
+                    BranchOUT.write(false);
+                }
+            }else{
+                 BranchOUT.write(false);
+                pcLoadOut.write(false);
+            }
+            if(write.read()){
+            Intern_dataDM = dataDM.read();
+            Intern_ALU_result = ALU_result.read();
+            Intern_label_j = label_j.read();
+            Intern_opdest = opdest.read();
+            ALU_result_Out.write(Intern_ALU_result);
+            label_j_out.write(Intern_label_j);
+            opdest_Out.write(Intern_opdest);
+            DMWriteOUT.write(DMWrite.read());
+            DMenableOUT.write(DMenable.read());
+            regWrite_Output.write(regWrite.read());
+            MemReg_Output.write(MemReg.read());
+            }else{
+            ALU_result_Out.write(Intern_ALU_result);
+            label_j_out.write(Intern_label_j);
+            opdest_Out.write(Intern_opdest);
+            DMWriteOUT.write(DMWrite.read());
+            DMenableOUT.write(DMenable.read());
+            regWrite_Output.write(regWrite.read());
+            MemReg_Output.write(MemReg.read());
+            dataDMOut.write(Intern_dataDM);
+            }
+            }
+        }
+    SC_CTOR(BufferEXMEM) {
+        SC_METHOD(bufferEXMEM);
+        sensitive << clk.pos();
+        
+    }
+};
+BufferIDEX.hpp
+#include <systemc.h>
+
+SC_MODULE(BufferIDEX) {
+
+    sc_in<bool>        clk;
+    sc_in<bool>        enable;
+    sc_in<bool>        write;
+    sc_in<bool>        reset;
+    sc_in<sc_uint<4>>  opcode;
+    // vem do Controller
+    sc_in<bool>        pcLoad;
+    sc_in <bool>       dmEnable;
+    sc_in <bool>       dmWrite;
+    sc_in<bool>        aluReset;
+    sc_in<sc_uint<4>>  aluOp;
+    sc_in<bool>        Branch;
+    sc_in<bool>        memToReg;
+    sc_in<sc_uint<16>> pcJump;
+    sc_in<sc_uint<16>> label_j;
+    sc_in<bool>        regWrite;
+    // vem do Registers
+    sc_in<sc_int<32>>  registerData1;
+    sc_in<sc_int<32>>  registerData2;
+    // vem do bufferifid
+    sc_in<sc_uint<6>>  destReg;
+    sc_in<sc_int<32>> dataDM;
+    sc_out<sc_int<32>> dataDMout;
+    sc_out<sc_int<32>> register1_Output;
+    sc_out<sc_int<32>> register2_Output;
+    
+    sc_out<sc_uint<6>> destReg_Output;
+    sc_out<bool>regWrite_Output;
+    sc_out<bool> Branch_Output;
+    sc_out<bool> memToReg_Output;
+    
+    sc_out<sc_uint<4>> opcode_Output;
+    sc_out<sc_uint<16>> pc_out;
+    sc_out<sc_uint<16>> label_j_out;
+    sc_out<bool> pcLoad_out;
+    sc_out<bool> dmEnable_out;
+    sc_out<bool> dmWrite_out;
+    sc_out<bool> aluReset_out;
+    sc_out<sc_uint<4>> aluOp_out;
+
+    bool Intern_Branch;
+    bool Intern_memToReg;
+    sc_uint<4> Intern_opcode;
+    sc_uint<16> Intern_pc;
+    sc_uint<16> Intern_label_j;
+    sc_uint<6> Intern_destReg;
+    sc_int<32> Intern_register1;
+    sc_int<32> Intern_register2;
+    sc_int<32> Intern_dataDM;
+    bool Intern_pcLoad;
+    bool Intern_dmEnable;
+    bool Intern_dmWrite;
+    bool Intern_aluReset;
+    sc_uint<4> Intern_aluOp;
+    
+    SC_CTOR(BufferIDEX) {
+        SC_METHOD(update);
+        sensitive << clk.pos();
+    }
+
+    void update() {
+        if (reset.read()) {
+                        Intern_dmWrite = 0;
+            Intern_dmEnable = 0;
+            Intern_pcLoad = 0;
+            Intern_Branch = 0;
+            Intern_memToReg = 0;
+            Intern_aluReset = 0;
+            Intern_aluOp = 0;
+            Intern_register1 = 0;
+            Intern_register2 = 0;
+            Intern_destReg = 0;
+            Intern_opcode = 0;
+            Intern_pc = 0;
+            Intern_label_j = 0;
+            Intern_dataDM = 0;
+            register1_Output.write(Intern_register1);
+            register2_Output.write(Intern_register2);
+            destReg_Output.write(Intern_destReg);
+            opcode_Output.write(Intern_opcode);
+            pc_out.write(Intern_pc);
+            label_j_out.write(Intern_label_j);
+            Branch_Output.write(Intern_Branch);
+            memToReg_Output.write(Intern_memToReg);
+            pcLoad_out.write(Intern_pcLoad);
+            dmEnable_out.write(Intern_dmEnable);
+            dmWrite_out.write(Intern_dmWrite);
+            aluReset_out.write(Intern_aluReset);
+            aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
+
+        } else {
+         if (enable.read()) {
+            if (write.read()) {
+                Intern_register1 = registerData1.read();
+                Intern_register2 = registerData2.read();
+                Intern_destReg = destReg.read();
+                Intern_opcode = opcode.read();
+                Intern_pc = pcJump.read();
+                Intern_label_j = label_j.read();
+                Intern_Branch = Branch.read();
+                Intern_memToReg = memToReg.read();
+                Intern_pcLoad = pcLoad.read();
+                Intern_dmEnable = dmEnable.read();
+                Intern_dmWrite = dmWrite.read();
+                Intern_aluReset = aluReset.read();
+                Intern_aluOp = aluOp.read();
+                Intern_dataDM = dataDM.read();
+            }  
+            register1_Output.write(Intern_register1);
+            register2_Output.write(Intern_register2);
+            destReg_Output.write(Intern_destReg);
+            opcode_Output.write(Intern_opcode);
+            pc_out.write(Intern_pc);
+            label_j_out.write(Intern_label_j);
+            Branch_Output.write(Intern_Branch);
+            memToReg_Output.write(Intern_memToReg);
+            pcLoad_out.write(Intern_pcLoad);
+            dmEnable_out.write(Intern_dmEnable);
+            dmWrite_out.write(Intern_dmWrite);
+            aluReset_out.write(Intern_aluReset);
+            aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
+
+
+            }else{
+            register1_Output.write(Intern_register1);
+            register2_Output.write(Intern_register2);
+            destReg_Output.write(Intern_destReg);
+            opcode_Output.write(Intern_opcode);
+            pc_out.write(Intern_pc);
+            label_j_out.write(Intern_label_j);
+            Branch_Output.write(Intern_Branch);
+            memToReg_Output.write(Intern_memToReg);
+            pcLoad_out.write(Intern_pcLoad);
+            dmEnable_out.write(Intern_dmEnable);
+            dmWrite_out.write(Intern_dmWrite);
+            aluReset_out.write(Intern_aluReset);
+            aluOp_out.write(Intern_aluOp);
+            dataDMout.write(Intern_dataDM);
+            }
+        }
+    }
+};
+
+BufferIFID.hpp
+#include <systemc.h>
+
+SC_MODULE(BufferIFID) {
+    // Entradas
+    sc_in<bool>         clk;
+    sc_in<bool>         enable;
+    sc_in<bool>         write;
+    sc_in<bool>         reset;
+    sc_in<sc_uint<32>>  instruction;
+    sc_in<sc_uint<16>>   Address_Addr;
+
+    sc_out<sc_uint<16>> Address_Addr_Out;
+    sc_out<sc_uint<32>> instruction_out;
+    sc_out<sc_uint<6>>  readRegister1;
+    sc_out<sc_uint<6>>  readRegister2;
+    sc_out<sc_int<16>>  immediate_out;
+    sc_out<sc_uint<4>>  opcode_out;
+    sc_out<sc_uint<6>>  DestReg_out;
+    sc_out<sc_uint<16>> label_j;
+
+    sc_uint<6>          Intern_DestReg_out;
+    sc_uint<16>         Intern_label_j;
+    sc_uint<16>          Intern_Address_Addr;
+    sc_uint<32>         Intern_instruction;
+    sc_uint<6>          Intern_readRegister1;
+    sc_uint<6>          Intern_readRegister2;
+    sc_uint<4>          Intern_opcode;
+    sc_int<16>          Intern_immediate;
+    enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
+    void bufferProcess() {
+        if(reset.read()){
+            Address_Addr_Out.write(0);
+            instruction_out.write(0);
+            readRegister1.write(0);
+            readRegister2.write(0);
+            immediate_out.write(0);
+            opcode_out.write(0);
+            DestReg_out.write(0);
+            label_j.write(0);
+        }
+        
+        if(enable.read()){
+            if(write.read()){
+            Intern_Address_Addr = Address_Addr.read();
+            Intern_instruction = instruction.read();
+            Intern_opcode = Intern_instruction.range(31, 28);
+    
+            //beq/bne
+            if(Intern_opcode == beq_op || Intern_opcode == bne_op){
+                Intern_readRegister1 =  Intern_instruction.range(27, 22);
+                Intern_readRegister2 =  Intern_instruction.range(21, 16);
+                Intern_label_j = Intern_instruction.range(15, 0);
+                Intern_DestReg_out = 0b000000;
+                Intern_immediate = 0; 
+
+            }else
+             if(Intern_opcode == j_op){
+                Intern_label_j = Intern_instruction.range(15, 0);
+            }else
+
+            if(Intern_opcode == addi_op|| Intern_opcode == lw_op || Intern_opcode == sw_op){
+                Intern_readRegister2 =  0b000000;
+                Intern_DestReg_out =  Intern_instruction.range(27, 22);
+                Intern_readRegister1 =  Intern_instruction.range(21, 16);
+                Intern_immediate = Intern_instruction.range(15, 0);
+                
+            }else{
+                Intern_DestReg_out =  Intern_instruction.range(27, 22);
+                Intern_readRegister1 =  Intern_instruction.range(21, 16);
+                Intern_readRegister2 =  Intern_instruction.range(15, 0);
+                Intern_immediate = 0;
+            }
+            }
+            instruction_out.write(Intern_instruction);
+            Address_Addr_Out.write(Intern_Address_Addr);
+            readRegister1.write(Intern_readRegister1);
+            opcode_out.write(Intern_opcode);
+            immediate_out.write(Intern_immediate);
+            readRegister2.write(Intern_readRegister2);
+            Intern_readRegister2 = Intern_instruction.range(20, 16);
+            readRegister2.write(Intern_readRegister2);
+            DestReg_out.write(Intern_DestReg_out);
+            label_j.write(Intern_label_j);
+        }
+    }
+
+     SC_CTOR(BufferIFID) {
+        SC_METHOD(bufferProcess);
+        sensitive << clk.pos();
+    }
+};
+
+BufferMMWB.hpp
+
+#include <systemc.h>
+
+SC_MODULE(BufferMEMWB) {
+
+    sc_in<bool> RegWrite;
+    sc_in<bool> clk;
+    sc_in<bool> memReg;
+    sc_in<sc_uint<6>> opDestino;
+    sc_in<sc_int<32>> dataAdress;
+    sc_in<sc_int<32>> readData; 
+
+    sc_out<bool> regWriteOutput;
+    sc_out<sc_uint<6>> writeRegister;
+    sc_out<bool> memRegOut;
+    sc_out<sc_int<32>> readDataOutput;
+    sc_out<sc_int<32>> dataAdressOutput;
+
+    sc_uint<6> internoReadData;
+    sc_int<32> internoDataAdress;
+    sc_uint<32> internoOpDestino;
+
+    SC_CTOR(BufferMEMWB) {
+
+        SC_METHOD(readMemory);
+        sensitive << clk.pos();
+
+    }
+
+    void readMemory() {
+                internoDataAdress = dataAdress.read();
+                internoOpDestino = opDestino.read();
+                internoReadData = readData.read();
+                writeRegister.write(internoOpDestino);
+                regWriteOutput.write(RegWrite);
+                memRegOut.write(memReg); 
+                readDataOutput.write(readData);
+                dataAdressOutput.write(dataAdress);
+        }
+    };
+
+Controller.hpp
+
+#include <systemc.h>
+
+SC_MODULE(Controller)
+{
+
+    enum OpC
+    {
+        zero_op = 0b0000,
+        and_op = 0b0001,
+        or_op = 0b0010,
+        xor_op = 0b0011,
+        not_op = 0b0100,
+        slt_op = 0b0101,
+        cmp_op = 0b0101,
+        add_op = 0b0110,
+        addi_op = 0b0111,
+        sub_op = 0b1000,
+        lw_op = 0b1001,
+        sw_op = 0b1010,
+        j_op = 0b1011,
+        beq_op = 0b1100,
+        bne_op = 0b1101
+    };
+
+    sc_in<bool> clk;
+
+    sc_in<sc_uint<32>> instruction;
+    sc_in<bool> zero;
+    sc_in<bool> reset;
+
+    // Sinais do PC
+    sc_out<bool> pcReset;
+    sc_out<bool> pcEnable;
+    sc_out<bool> PcLoad;
+    sc_out<sc_uint<16>> pcjump;
+
+    // Sinais dos Registradores
+    sc_out<bool> regEnable;
+    sc_out<bool> regWrite;
+
+    // Sinais da Instruction Memory
+    sc_out<bool> imEnable;
+    sc_out<bool> imwrite;
+
+    // Sinais da Data Memory
+    sc_out<bool> dmEnable;
+    sc_out<bool> dmWrite;
+
+    sc_out<bool> memToReg;
+
+    // Sinais  BufferIDEX
+    sc_out<bool> enable_BufferIDEX;
+    sc_out<bool> write_BufferIDEX;
+    sc_out<bool> reset_BufferIDEX;
+    sc_out<bool> branch;
+    // Sinais BufferEXMEM
+
+    sc_out<bool> enable_BufferEXMEM;
+    sc_out<bool> write_BufferEXMEM;
+    sc_out<bool> reset_BufferEXMEM;
+    // Sinais BufferMEMWB
+    sc_out<bool> enable_BufferMEMWB;
+    sc_out<bool> write_BufferMEMWB;
+    sc_out<bool> reset_BufferMEMWB;
+    // Sinais do ALU
+    sc_out<sc_uint<4>> aluOp;
+    sc_out<bool> aluReset;
+    sc_out<sc_uint<22>> addressOut;
+    // locais
+    sc_uint<32> label;
+    sc_uint<4> opcode;
+    sc_uint<6> opd;
+    sc_uint<6> op1;
+    sc_uint<16> op2;
+
+    int state = 0;
+    bool restart;
+
+    void IF()
+    {
+        imEnable.write(true);
+        pcEnable.write(true);
+    }
+    void ID()
+    {
+        imEnable.write(false);
+        pcEnable.write(false);
+    }
+    void RE()
+    {
+        regEnable.write(true);
+        regWrite.write(true);
+    }
+    void updateState()
+    {
+
+        opcode = instruction.read().range(31, 28);
+        label = instruction.read().range(27, 0);
+        opd = instruction.read().range(27, 22);
+        op1 = instruction.read().range(21, 16);
+        op2 = instruction.read().range(15, 0);
+       
+        if (opcode == beq_op)
+        {
+            branch.write(true);
+        }
+        else if(opcode == bne_op)
+        {
+            branch.write(false);
+        }
+        if(opcode == lw_op || opcode == sw_op)
+        {
+              addressOut.write(instruction.read().range(21, 0));
+        }
+        switch (state)
+        {
+        case 0:
+            IF();
+            state = 1;
+            break;
+        case 1:
+            ID();
+            state = 2;
+            break;
+        case 2:
+            if (!restart)
+            {
+                RE();
+                state = 3;
+            }
+            break;
+        case 3:
+            regEnable.write(true);
+            state = 4;
+            IF();
+            break;
+        case 4:
+            ID();
+            if (opcode == 7)
+            { // Lw
+                regEnable.write(true);
+                regWrite.write(true);
+                dmEnable.write(true);
+                dmWrite.write(true);
+                regWrite.write(true);
+                state = 6;
+            }
+            else if (opcode == 8)
+            { // Sw
+                dmEnable.write(true);
+                dmWrite.write(false);
+                regWrite.write(true);
+                state = 7;
+            }
+            else if (opcode == 9)
+            { // J
+                pcEnable.write(false);
+                pcjump.write(label);
+                restart = true;
+                state = 8;
+            }
+            else if (opcode == 10)
+            { // bne
+                if (!zero.read())
+                {
+                    pcEnable.write(false);
+                    pcjump.write(label);
+                    aluReset.write(true);
+                    restart = true;
+                }
+                state = 8;
+            }
+            else if (opcode == 11)
+            { // beq
+                if (zero.read())
+                {
+                    pcEnable.write(false);
+                    pcjump.write(label);
+                    aluReset.write(true);
+                    restart = true;
+                }
+                state = 8;
+            }
+            else if (opcode > 0 && opcode < 7)
+            { // ALU
+                regWrite.write(false);
+                regEnable.write(true);
+                regWrite.write(false);
+                state = 9;
+            }
+
+            break;
+        case 6: // LD STATE
+            regEnable.write(true);
+            regWrite.write(true);
+            state = 10;
+            break;
+        case 7: // ST STATE
+            dmEnable.write(true);
+            dmWrite.write(true);
+            state = 10;
+            break;
+        case 8:
+            state = 2;
+            break;
+        case 9:
+            regEnable.write(true);
+            regWrite.write(true);
+            state = 10;
+            break;
+        case 10:
+            regEnable.write(false);
+            regWrite.write(false);
+            break;
+        default:
+            break;
+        }
+    }
+
+    SC_CTOR(Controller)
+    {
+        SC_METHOD(updateState);
+        sensitive << clk.pos();
+    }
+};
+
+DataMemory.hpp
+#include <systemc.h>
+
+#define MEMORY_SIZE 4096
+
+SC_MODULE(DataMemory) {
+    sc_in<bool> clk; 
+    sc_in<bool> memWrite; 
+    sc_in<bool> enable; 
+    sc_in<sc_int<32>> write_data; 
+    sc_in<sc_int<32>> address; 
+    sc_out<sc_int<32>> readData;
+    
+    sc_uint<16> internoAdress; 
+
+    sc_int<32> memory[MEMORY_SIZE];
+    
+    void memoryOperation() {
+        internoAdress = address.read();
+        sc_uint<16> localAddres = 0;
+
+        if (enable.read() == true) {
+
+             if(memWrite.read()== true){
+                     localAddres = internoAdress;
+                     readData.write(memory[localAddres]);
+            } else {
+                     localAddres = internoAdress;
+                     memory[localAddres] = write_data.read();
+            }
+        }
+
+    }
+        SC_CTOR(DataMemory) {
+        for (int i = 0; i < MEMORY_SIZE; ++i) {
+            memory[i] = 0;
+        }
+        SC_METHOD(memoryOperation);
+        sensitive << clk.value_changed();
+    }
+
+};
+
+InstructionMemory.hpp
+#include <systemc.h>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <sstream>
+#include <unordered_map>
+#include <bitset>
+using namespace std;
+SC_MODULE(InstructionMemory)
+{
+    sc_in<bool> clk;
+    sc_in<bool> enable;
+    sc_in<bool> write;
+    sc_in<sc_uint<16>> address;
+    sc_out<sc_uint<32>> instruction;
+
+    sc_uint<32> internInstruction;
+    sc_uint<32> memory[1024];
+
+
+        SC_CTOR(InstructionMemory)
+    {
+        convertAsmInInstructions();
+        SC_THREAD(fetchInstruction);
+        sensitive << clk.pos();
+    }
+    void fetchInstruction()
+    {
+        while (true)
+        {
+            wait();
+            if (enable.read())
+            {
+                if (write.read())
+                {
+                    memory[address.read()] = instruction.read();
+                }
+                instruction.write(memory[address.read()]);
+            }
+            if(memory[address.read()] == 0b0){
+                sc_stop();
+            }
+        }
+    }
+
+public:
+    enum OpC
+    {
+        zero_op = 0b0000,
+        and_op = 0b0001,
+        or_op = 0b0010,
+        xor_op = 0b0011,
+        not_op = 0b0100,
+        slt_op = 0b0101,
+        cmp_op = 0b0101,
+        add_op = 0b0110,
+        addi_op = 0b0111,
+        sub_op = 0b1000,
+        lw_op = 0b1001,
+        sw_op = 0b1010,
+        j_op = 0b1011,
+        beq_op = 0b1100,
+        bne_op = 0b1101
+    };
+    map<string, sc_uint<16>> jumpLocations = {};
+
+    void convertAsmInInstructions()
+    {
+        jumpLocations = {};
+        if (sc_argc() < 2)
+        {
+            cerr << "Uso: ./my_program <nome_do_arquivo>" << endl;
+            return;
+        }
+
+        const char *filename = sc_argv()[1];
+        vector<string> documentLines = readDocument(filename);
+        vector<sc_uint<32>> dataoutput;
+
+        cout << "Linhas de código '" << filename << "':" << endl;
+
+        for (const auto &line : documentLines)
+        {
+            cout << line << endl;
+            sc_uint<32> intValue = convertInstructionTobin(line);
+            dataoutput.push_back(intValue);
+        }
+
+        cout << "conversão de linha de codigo resultam nas seguintes instrucoes:" << endl;
+        for (int i = 0; i < int(dataoutput.size()); i++)
+        {
+            memory[i] = dataoutput[i];
+            cout << "linha de codigo " << i << " virou instrução: " << bitset<32>(dataoutput[i]) << endl;
+        }
+    }
+    vector<string> readDocument(const std::string &filename)
+    {
+        vector<string> lines;
+        ifstream file(filename);
+        if (file.is_open())
+        {
+            string line;
+            sc_uint<16> ct = 0b0000000000000000;
+            while (getline(file, line))
+            {
+                if (line.size() >= 1)
+                {
+                    ct = ct + 0b0000000000000001;
+                    if (line.find(":"))
+                    {
+                        line.substr(0, line.size() - 1);
+                        jumpLocations.insert({line, ct});
+                    }
+                    lines.push_back(line); // Adiciona a linha lida ao vetor de linhas
+                }
+            }
+            file.close();
+        }
+        else
+        {
+            cerr << "Erro ao abrir o arquivo '" << filename << "'" << endl;
+        }
+        return lines;
+    }
+
+    sc_uint<32> convertInstructionTobin(string line)
+    {
+        sc_uint<32> binaryValue = 0;
+        map<string, int> opcodeValues = {
+            {"and", 0b0001}, {"or", 0b0010}, {"xor", 0b0011}, {"not", 0b0100}, {"slt", 0b0101}, {"cmp", 0b0101}, {"add", 0b0110}, {"addi", 0b0111}, {"sub", 0b1000}, {"lw", 0b1001}, {"sw", 0b1010}, {"j", 0b1011}, {"beq", 0b1100}, {"bne", 0b1101}
+
+        };
+        line.erase(std::remove(line.begin(), line.end(), ','), line.end());
+        istringstream ss(line);
+        string opcode, opd, op1, op2;
+        ss >> opcode >> opd >> op1 >> op2;
+        sc_uint<4> opcodeValue = zero_op;
+        if (opcodeValues.find(opcode) != opcodeValues.end())
+        {
+            opcodeValue = opcodeValues[opcode];
+        }
+        else
+        {
+            cerr << "opcode não localizado" << endl;
+        }
+        binaryValue.range(31, 28) = opcodeValue;
+        if ((opcodeValue == lw_op) | (opcodeValue == sw_op))
+        {
+            binaryValue.range(27, 22) = registradorToBinary(opcodeValue, opd, 1); // Registrador destino
+            binaryValue.range(21, 0) = registradorToBinary(opcodeValue, op1, 2);  // registrador + offset
+        }
+        else if (opcodeValue == j_op)
+        {
+            binaryValue.range(27, 0) = registradorToBinary(opcodeValue, opd, 1); // Registrador destino
+        }
+        else
+        {
+            binaryValue.range(27, 22) = registradorToBinary(opcodeValue, opd, 1); // Registrador destino
+            binaryValue.range(21, 16) = registradorToBinary(opcodeValue, op1, 2); // Registrador fonte 1
+            binaryValue.range(15, 0) = registradorToBinary(opcodeValue, op2, 3);  // Registrador fonte 2 ou imediato
+        }
+
+        return binaryValue;
+    }
+
+    sc_uint<32> registradorToBinary(sc_uint<4> opcd, string reg, int tp)
+    {
+        std::unordered_map<std::string, sc_uint<6>> registradores = {
+            {"$zero", 0b000000}, {"$at", 0b000001}, {"$v0", 0b000010}, {"$v1", 0b000011}, {"$a0", 0b000100}, {"$a1", 0b000101}, {"$a2", 0b000110}, {"$a3", 0b000111}, {"$t0", 0b001000}, {"$t1", 0b001001}, {"$t2", 0b001010}, {"$t3", 0b001011}, {"$t4", 0b001100}, {"$t5", 0b001101}, {"$t6", 0b001110}, {"$t7", 0b001111}, {"$s0", 0b010000}, {"$s1", 0b010001}, {"$s3", 0b010011}, {"$s4", 0b010100}, {"$s5", 0b010101}, {"$s6", 0b010110}, {"$s7", 0b010111}, {"$t8", 0b011000}, {"$t9", 0b011001}, {"$gp", 0b011100}, {"$sp", 0b11101}, {"$fp", 0b011110}, {"$ra", 0b011111}};
+        if (reg == "$zero")
+        {
+            if (tp == 2)
+            {
+                return 0b000000;
+            }
+            else if (tp == 3)
+            {
+                return 0b0000000000000000;
+            }
+        }
+        else if ((opcd == j_op))
+        {
+            
+            sc_uint<16> jumpAddress = jumpLocations[reg];
+            
+            return jumpAddress;
+        }
+        else if (opcd == not_op)
+        {
+         
+            if ((tp == 1) | (tp == 2))
+            {
+                sc_uint<6> regIntern = 0b000000000;
+                if (registradores.find(reg) != registradores.end())
+                {
+                    regIntern = registradores[reg];
+                    return regIntern;
+                    
+                }
+                else
+                {
+                    cerr << "registrador não localizado" << endl;
+                }
+            }
+            else
+            {
+                return 0b0000000000000000;
+            }
+        }
+        else if (((opcd == beq_op) | (opcd == bne_op)) & (tp == 3))
+        {
+            
+            if (jumpLocations.find(reg) != jumpLocations.end())
+            {
+                sc_uint<16> regIntern = jumpLocations[reg];
+            }
+            else
+            {
+                cerr << "AVISO: MARCAÇÃO USADA NÃO DEFINIDA NO Sistema";
+                sc_stop(); 
+            }
+        }
+        else if ((opcd == addi_op) & (tp == 3))
+        {
+            
+            sc_uint<6> regIntern = stoi(reg);
+            return regIntern;
+        }
+        else if ((opcd == lw_op) | (opcd == sw_op))
+        {
+            sc_uint<6> registerIntern = 0b000000;
+            sc_uint<16> offset;
+            if (tp == 1)
+            {
+                sc_uint<6> regIntern = 0b000000000;
+                if (registradores.find(reg) != registradores.end())
+                {
+                    regIntern = registradores[reg];
+                    return regIntern;
+                }
+                else
+                {
+                    cerr << "registrador " << reg << " não localizado" << endl;
+                }
+            }
+            else if (tp == 2)
+            {
+                size_t pos1 = reg.find('(');
+                size_t pos2 = reg.find(')');
+                if (pos1 != string::npos && pos2 != string::npos && pos2 > pos1)
+                {
+                    string strOffset = reg.substr(0, pos1);
+                    offset = std::stoi(strOffset);
+                    string registradorBase = reg.substr(pos1 + 1, pos2 - pos1 -1);
+                    registerIntern = 0b000000;
+                    if (registradores.find(registradorBase) != registradores.end())
+                    {
+                        registerIntern = registradores[registradorBase];
+                        
+                    }
+                    else
+                    {
+                        cerr << "registrador não localizado" << endl;
+                    }
+                }
+                else
+                {
+                    cerr << "formato de dado de lw/sw errado" << endl;
+                }
+                sc_uint<22> lwresult = 0;
+                lwresult.range(21, 16) = registerIntern;
+                lwresult.range(15, 0) = offset;
+                return lwresult;
+            }
+        }
+        else
+        {
+            if ((tp == 1) | (tp == 2))
+            {
+                sc_uint<6> regIntern = 0b000000000;
+                if (registradores.find(reg) != registradores.end())
+                {
+                    regIntern = registradores[reg];
+                    return regIntern;
+                }
+                else
+                {
+                    cerr << "registrador não localizado" << endl;
+                }
+            }
+            else
+            {
+                sc_uint<16> regIntern = 0b0000000000000000000;
+                if (registradores.find(reg) != registradores.end())
+                {
+                    regIntern = registradores[reg];
+                    return regIntern;
+                  
+                }
+                else
+                {
+                    cerr << "registrador não localizado" << endl;
+                }
+            }
+        }
+        return 0;
+    }
+
+
+};
+
+Mux.hpp
+#include <systemc.h>
+
+SC_MODULE(Mux) {
+    sc_in<bool> pcSRC; 
+    sc_in<sc_uint<16>> in0; 
+    sc_in<sc_uint<16>> in1; 
+    sc_out<sc_uint<16>> out; 
+
+    void process() {
+        if (pcSRC.read() == 0) {
+            out.write(in0.read()); 
+        } else {
+            out.write(in1.read());
+        }
+    }
+
+    SC_CTOR(Mux) {
+        SC_METHOD(process);
+        sensitive << pcSRC << in0 << in1;
+    }
+};
+MuxDM.hpp
+#include <systemc.h>
+
+SC_MODULE(MuxDM) {
+    sc_in<bool> memReg; 
+    sc_in<sc_int<32>> in0; 
+    sc_in<sc_int<32>> in1; 
+    sc_out<sc_int<32>> out; 
+
+    void process() {
+        if (memReg.read() == 0) {
+            out.write(in0.read()); 
+        } else {
+            out.write(in1.read());
+        }
+    }
+
+    SC_CTOR(MuxDM) {
+        SC_METHOD(process);
+        sensitive << memReg << in0 << in1;
+    }
+};
+
+ProgramCounter.hpp
+#include <systemc.h>
+#include <iostream>
+using namespace std;
+SC_MODULE(ProgramCounter) {
+    sc_in<bool> clk; 
+    sc_in<sc_uint<16>> pcInput;
+    sc_in<bool> reset;
+    sc_in<bool>enable;
+    sc_in<bool>load;
+    
+    sc_out<sc_uint<16>> pcOutput;
+    
+    sc_uint<16> currentInstruction;
+
+    void counterIntruction() {
+        currentInstruction = 0;
+        if(reset.read()){
+            currentInstruction = 0;
+            pcOutput.write(currentInstruction);
+        }else if(enable.read()){
+            currentInstruction = pcInput.read();
+            pcOutput.write(currentInstruction);
+        }
+    }
+    
+    SC_CTOR(ProgramCounter) {
+       currentInstruction = 0; 
+        SC_METHOD(counterIntruction);
+        sensitive << clk.pos();
+        sensitive << reset;
+    }
+};
+
+Registers.hpp
+#include <systemc.h>
+
+#define NUM_REGISTERS 32
+
+SC_MODULE(Registers)
+{
+    sc_in<bool> clk;
+    sc_in<bool> RegWrite;
+    sc_in<bool> enable;
+    sc_in<sc_uint<4>> opcode;
+    sc_in<sc_uint<6>> destReg;
+    sc_in<sc_uint<6>> writeRegister;
+    sc_in<sc_int<32>> writeData;
+    sc_in<sc_uint<6>> readRegister1;
+    sc_in<sc_uint<6>> readRegister2;
+    sc_in<sc_int<16>> immediate;
+    sc_out<sc_int<32>> readData1;
+    sc_out<sc_int<32>> readData2;
+    sc_out<sc_int<32>> writeDataOut;
+    sc_int<32> Intern_immediate;
+    sc_int<32> registers[NUM_REGISTERS];
+    sc_int<32> readData1_intern, readData2_intern;
+    void writeRegistrator()
+    {
+        if (enable.read())
+        {
+
+            if (RegWrite.read() == true)
+            {
+                registers[writeRegister.read()] = writeData.read();
+            }
+        }
+    }
+
+    void readRegistrator()
+    {
+        if (enable.read())
+        {
+            if (opcode.read() == 0b0111)
+            {
+                readData1.write(registers[readRegister1.read()]);
+                Intern_immediate = immediate.read();
+                readData2.write(Intern_immediate);
+            }
+            else if(opcode.read() == 0b1001){
+                
+              readData1_intern = readRegister1.read();
+                Intern_immediate = immediate.read();
+                readData1.write(readData1_intern);
+                readData2.write(Intern_immediate);
+            }
+            else if(opcode.read() == 0b1010){
+                readData1_intern = readRegister1.read();
+                Intern_immediate = immediate.read();
+                readData1.write(readData1_intern);
+                readData2.write(Intern_immediate);
+                writeDataOut.write(registers[destReg.read()]);
+                
+            }
+            else
+            {
+                readData1.write(registers[readRegister1.read()]);
+                readData2.write(registers[readRegister2.read()]);
+            }
+        }
+    }
+
+    SC_CTOR(Registers)
+    {
+        for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i)
+        {
+            registers[i] = 0;
+        }
+
+        SC_METHOD(writeRegistrator);
+        sensitive << clk.pos();
+        
+        SC_METHOD(readRegistrator);
+        sensitive << readRegister1 << readRegister2;
+    }
+};
+main.cpp
+
+#include <systemc.h>
+#include<InstructionMemory.hpp>
+#include<ProgramCounter.hpp>
+#include<Registers.hpp>
+#include<Alu.hpp>
+#include<DataMemory.hpp>
+#include<Addr.hpp>
+#include<Controller.hpp>
+#include<Mux.hpp>
+#include<MuxDM.hpp>
+#include<BufferIFID.hpp>
+#include<BufferIDEX.hpp>
+#include<BufferEXMEM.hpp>
+#include<BufferMEMWB.hpp>
+
+int sc_main(int arg, char* argv[]) {
+
+	ProgramCounter PC("PC");
+
+	InstructionMemory IM("IM");
+
+	Addr Addr("Addr");
+
+	Mux Mux("Mux");
+
+	BufferIFID BufferIFID("BufferIFID");
+
+	Registers RegistersData("RegistersData");
+
+	BufferIDEX BufferIDEX("BufferIDEX");
+
+	Controller Controller("Controller");
+
+	Alu ALU("ALU");
+
+	BufferEXMEM BufferEXMEM("BufferEXMEM");
+
+	DataMemory DM("DM");
+
+	BufferMEMWB BufferMEMWB("BufferMEMWB");
+
+	MuxDM MuxDM("MuxDM");
+
+//-----------------------------------------------------------------------------------------------
+	sc_signal<bool> clk;
+	sc_signal<bool> reset;
+	//pc signals
+	sc_signal<bool> Controller_PC_reset; //controller
+	sc_signal<bool> Controller_PC_enable; // controller
+	sc_signal<bool> BufferEXMEM_PCjump; // BufferEXMEM
+	sc_signal<sc_uint<16>> Mux_PC_loadAddrs;	// Mux
+	sc_signal<sc_uint<16>> PC_IM_pcOutput;// IM
+	sc_signal<sc_uint<16>> PC_Addr_pcOutput; // Addr
+
+	//IM signals
+	sc_signal<bool> Controller_IM_enable; // controller
+	sc_signal<bool> Controller_IM_Write;
+	sc_signal<sc_uint<32>> IM_BufferIFID_instruction; // BufferIDEX
+
+	//Addr signals
+	sc_signal<sc_uint<16>> Addr_MUX_op0; // Mux
+	sc_signal<sc_uint<16>> Addr_BufferIFID_address; // BufferIFID
+
+	//Mux signals
+	sc_signal<bool> Brach_Mux_pcSRC; // BufferEXMEM
+	sc_signal<sc_uint<16>> BufferEXMEM_MUX_op1; // BufferEXMEM
+
+	//BufferIFID signals
+	sc_signal<bool> Controller_BufferIFID_enable; // Controller
+	sc_signal<bool> Controller_BufferIFID_write; // Controller
+	sc_signal<bool> Controller_BufferIFID_reset; // Controller
+	sc_signal<sc_uint<32>> BufferIFID_Controller_instruction; // Controller
+	sc_signal<sc_uint<16>> BufferIFID_BufferIDEX_address; // BufferIDEX
+	sc_signal<sc_uint<6>> BufferIFID_BufferIDEX_Opdest; // BufferIDEX
+	sc_signal<sc_uint<6>> BufferIFID_Registers_Opdest;
+	sc_signal<sc_uint<6>> BufferIFID_Registers_readRegister1; // Registers
+	sc_signal<sc_uint<6>> BufferIFID_Registers_readRegister2; // Registers
+	sc_signal<sc_int<16>> BufferIFID_Registers_immediate; // Registers
+	sc_signal<sc_uint<4>> BufferIFID_Registers_opcode; // Registers
+    sc_signal<sc_uint<16>> BufferIFID_BufferIDEX_label_j; // BufferIDEX
+
+	//Registers signals
+	sc_signal<bool> Controller_Registers_enable; // Controller
+	sc_signal<bool> BufferMEMWB_Registers_RegWrite; // Controller
+	sc_signal<bool> Controller_Registers_reset; // Controller
+	sc_signal<sc_uint<6>> BufferMEMWB_Registers_writeRegister; // BufferMEMWB
+	sc_signal<sc_int<32>> MUXDM_Registers_writeData; //   MuxDM
+	sc_signal<sc_int<32>> Registers_BufferIDEX_readData1; // BufferIDEX
+	sc_signal<sc_int<32>> Registers_BufferIDEX_readData2; // BufferIDEX
+	sc_signal<sc_int<32>> Registers_BufferIDEX_writeDataOut; // Registers
+	
+
+	//BufferIDEX signals
+	sc_signal<bool> Controller_BufferIDEX_enable; // Controller
+	sc_signal<bool> Controller_BufferIDEX_reset; // Controller
+	sc_signal<bool> Controller_BufferIDEX_write; // Controller
+	sc_signal<bool> Controller_BufferIDEX_Reset; // Controller
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData1;
+	sc_signal<sc_int<32>> BufferIDEX_ALU_registerData2;
+	sc_signal<sc_uint<6>> BufferIDEX_BufferEXMEM_destReg;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_Branch_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_memToReg_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_opcode_output;
+	sc_signal<sc_uint<4>> BufferIDEX_BufferEXMEM_opcode_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_pc_output;
+	sc_signal<sc_uint<16>> BufferIDEX_BufferEXMEM_label_j_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_pcLoad_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmEnable_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_dmWrite_output;
+	sc_signal<bool> BufferIDEX_ALU_aluReset_output;
+	sc_signal<sc_uint<4>> BufferIDEX_ALU_aluOp_output;
+	sc_signal<bool> BufferIDEX_BufferEXMEM_RegWrite;
+	sc_signal<sc_int<32>> BufferIDEX_BufferEXMEM_dataDM;
+
+	//Controller signals
+	
+	sc_signal<bool> Controller_reset; // Controller
+	sc_signal<sc_uint<16>> Controller_BufferIDEX_pcJump; // BufferIDEX
+	sc_signal<bool> Controller_BufferIDEX_Branch; // BufferIDEX
+	sc_signal<bool> Controller_BufferIDEX_pcLoad; // BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_EnableDM; //BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_WriteDM;//BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_MemtoReg; //BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_EnableBufferIDEX; //BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_WriteBufferIDEX; //BufferIDEX
+	sc_signal<bool>	Controller_BufferIDEX_ResetBufferIDEX;
+	sc_signal<bool>	Controller_BufferEXMEM_enableBufferEXMEM; //BufferEXMEM
+	sc_signal<bool>	Controller_BufferEXMEM_WriteBufferEXMEM; //BufferEXMEM
+	sc_signal<bool>	Controller_BufferEXMEM_ResetBufferEXMEM; //BufferEXMEM
+	sc_signal<bool>	Controller_BufferMEMWB_enableBufferMEMWB; //BufferMEMWB
+	sc_signal<bool>	Controller_BufferMEMWB_WriteBufferMEMWB; //BufferMEMWB
+	sc_signal<bool>	Controller_BufferMEMWB_ResetBufferMEMWB; //BufferMEMWB
+	sc_signal<sc_uint<4>> Controller_BufferIDEX_aluOp; //Controller
+	sc_signal<bool> Controller_BufferIDEX_resetALU; //Controller
+	sc_signal<bool>Controller_BufferIDEX_RegWrite;
+	//ALU
+	sc_signal<bool> ALU_BufferEXMEM_zero;
+	sc_signal<sc_int<32>> ALU_Bufferexmem_result;
+
+	//BufferEXMEM
+	sc_signal<bool> BufferEXMEM_DataMemory_DMenable;
+	sc_signal<bool> BufferEXMEM_DataMemory_DMWrite;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_MemReg;
+	sc_signal<bool> BufferEXMEM_BufferMEMWB_RegWrite;
+	sc_signal<sc_int<32>>BufferEXMEM_DataMemory_WriteData;
+	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_Opdest;
+	sc_signal<sc_int<32>> BufferEXMEM_BufferMEMWB_address;
+
+	//DataMemory
+	sc_signal<sc_int<32>> DataMemory_BufferMEMWB_ReadData;
+
+	sc_signal<bool> BufferMEMWB_MUXDM_memtoreg;
+	sc_signal<sc_int<32>> BufferMEMWB_muxDM_readDataOutput;
+	sc_signal<sc_int<32>> BufferMEMWB_muxDM_dataAdressOutput;
+
+
+
+
+//-----------------------------------------------------------------------------------------------
+
+	PC.clk(clk);
+	PC.reset(reset);
+	PC.enable(Controller_PC_enable);
+	PC.pcInput(Mux_PC_loadAddrs);
+	PC.pcOutput(PC_IM_pcOutput);
+	PC.load(BufferIDEX_BufferEXMEM_pcLoad_output);
+
+	IM.clk(clk);
+	IM.enable(Controller_IM_enable);
+	IM.address(PC_IM_pcOutput);
+	IM.write(Controller_IM_Write);
+	IM.instruction(IM_BufferIFID_instruction);
+
+	Addr.first_value(Addr_MUX_op0);
+	Addr.output_value(PC_Addr_pcOutput);
+	Addr.output_value(Addr_BufferIFID_address);
+
+	Mux.in0(Mux_PC_loadAddrs);
+	Mux.in1(BufferEXMEM_MUX_op1);
+	Mux.pcSRC(Brach_Mux_pcSRC);
+
+	BufferIFID.clk(clk);
+	BufferIFID.enable(Controller_BufferIFID_enable);
+	BufferIFID.reset(Controller_BufferIFID_reset);
+	BufferIFID.write(Controller_BufferIFID_write);
+	BufferIFID.instruction(IM_BufferIFID_instruction);
+	BufferIFID.Address_Addr(Addr_BufferIFID_address);
+	BufferIFID.Address_Addr_Out(BufferIFID_BufferIDEX_address);
+	BufferIFID.instruction_out(BufferIFID_Controller_instruction);
+	BufferIFID.readRegister1(BufferIFID_Registers_readRegister1);
+	BufferIFID.readRegister2(BufferIFID_Registers_readRegister2);
+	BufferIFID.immediate_out(BufferIFID_Registers_immediate);
+	BufferIFID.opcode_out(BufferIFID_Registers_opcode);
+	BufferIFID.DestReg_out(BufferIFID_BufferIDEX_Opdest);
+	BufferIFID.label_j(BufferIFID_BufferIDEX_label_j);
+
+	RegistersData.clk(clk);
+	RegistersData.enable(Controller_Registers_enable);
+	RegistersData.RegWrite(BufferMEMWB_Registers_RegWrite);
+	RegistersData.opcode(BufferIFID_Registers_opcode);
+	RegistersData.writeRegister(BufferMEMWB_Registers_writeRegister);
+	RegistersData.writeData(MUXDM_Registers_writeData);
+	RegistersData.readRegister1(BufferIFID_Registers_readRegister1);
+	RegistersData.readRegister2(BufferIFID_Registers_readRegister2);
+	RegistersData.immediate(BufferIFID_Registers_immediate);
+	RegistersData.readData1(Registers_BufferIDEX_readData1);
+	RegistersData.readData2(Registers_BufferIDEX_readData2);
+	RegistersData.destReg(BufferIFID_Registers_Opdest);
+	RegistersData.writeDataOut(Registers_BufferIDEX_writeDataOut);
+
+	BufferIDEX.clk(clk);
+	BufferIDEX.enable(Controller_BufferIDEX_enable);
+	BufferIDEX.reset(Controller_BufferIDEX_reset);
+	BufferIDEX.write(Controller_BufferIDEX_write);
+	BufferIDEX.opcode(BufferIFID_Registers_opcode);
+	BufferIDEX.pcLoad(Controller_BufferIDEX_pcLoad);
+	BufferIDEX.dmEnable(Controller_BufferIDEX_EnableDM);
+	BufferIDEX.dmWrite(Controller_BufferIDEX_WriteDM);
+	BufferIDEX.aluReset(Controller_BufferIDEX_resetALU);
+	BufferIDEX.aluOp(Controller_BufferIDEX_aluOp);
+	BufferIDEX.memToReg(Controller_BufferIDEX_MemtoReg);
+	BufferIDEX.pcJump(Controller_BufferIDEX_pcJump);
+	BufferIDEX.Branch(Controller_BufferIDEX_Branch);
+	BufferIDEX.label_j(BufferIFID_BufferIDEX_label_j);
+	BufferIDEX.registerData1(Registers_BufferIDEX_readData1);
+	BufferIDEX.registerData2(Registers_BufferIDEX_readData2);
+	BufferIDEX.register1_Output(BufferIDEX_ALU_registerData1);
+	BufferIDEX.register2_Output(BufferIDEX_ALU_registerData2);
+	BufferIDEX.destReg(BufferIFID_BufferIDEX_Opdest);
+	BufferIDEX.opcode_Output(BufferIFID_Registers_opcode);
+	BufferIDEX.Branch_Output(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferIDEX.memToReg_Output(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_opcode_output);
+	BufferIDEX.pc_out(BufferIDEX_BufferEXMEM_pc_output);
+	BufferIDEX.label_j_out(BufferIDEX_BufferEXMEM_label_j_output);
+	BufferIDEX.pcLoad_out(BufferIDEX_BufferEXMEM_pcLoad_output);
+	BufferIDEX.dmEnable_out(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferIDEX.dmWrite_out(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferIDEX.aluReset_out(BufferIDEX_ALU_aluReset_output);
+	BufferIDEX.aluOp_out(BufferIDEX_ALU_aluOp_output);
+	BufferIDEX.opcode_Output(BufferIDEX_BufferEXMEM_opcode_output);
+	BufferIDEX.regWrite(Controller_BufferIDEX_RegWrite);
+	BufferIDEX.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferIDEX.dataDM(Registers_BufferIDEX_writeDataOut);
+	BufferIDEX.dataDMout(BufferIDEX_BufferEXMEM_dataDM);
+
+
+	Controller.clk(clk);
+	Controller.reset(Controller_reset);
+	Controller.instruction(BufferIFID_Controller_instruction);
+	Controller.pcEnable(Controller_PC_enable);
+	Controller.PcLoad(Controller_BufferIDEX_pcLoad);
+	Controller.pcReset(Controller_PC_reset);
+	Controller.regEnable(Controller_Registers_enable);
+	Controller.regWrite(Controller_BufferIDEX_RegWrite);
+	Controller.imEnable(Controller_IM_enable);
+	Controller.imwrite(Controller_IM_Write);
+	Controller.dmEnable(Controller_BufferIDEX_EnableDM);
+	Controller.dmWrite(Controller_BufferIDEX_WriteDM);
+	Controller.memToReg(Controller_BufferIDEX_MemtoReg);
+	Controller.pcjump(Controller_BufferIDEX_pcJump);
+	Controller.branch(Controller_BufferIDEX_Branch);
+	Controller.enable_BufferIDEX(Controller_BufferIDEX_EnableBufferIDEX);
+	Controller.write_BufferIDEX(Controller_BufferIDEX_WriteBufferIDEX);
+	Controller.reset_BufferIDEX(Controller_BufferIDEX_ResetBufferIDEX);
+	Controller.enable_BufferEXMEM(Controller_BufferEXMEM_enableBufferEXMEM);
+	Controller.write_BufferEXMEM(Controller_BufferEXMEM_WriteBufferEXMEM);
+	Controller.reset_BufferEXMEM(Controller_BufferEXMEM_ResetBufferEXMEM);
+	Controller.enable_BufferMEMWB(Controller_BufferMEMWB_enableBufferMEMWB);
+	Controller.write_BufferMEMWB(Controller_BufferMEMWB_WriteBufferMEMWB);
+	Controller.reset_BufferMEMWB(Controller_BufferMEMWB_ResetBufferMEMWB);
+	Controller.aluOp(Controller_BufferIDEX_aluOp);
+	Controller.zero(ALU_BufferEXMEM_zero);
+
+
+	ALU.clk(clk);
+	ALU.reset(Controller_BufferIDEX_resetALU);
+	ALU.opcode(BufferIDEX_ALU_opcode_output);
+	ALU.first_value(BufferIDEX_ALU_registerData1);
+	ALU.second_value(BufferIDEX_ALU_registerData2);
+	ALU.output_value(ALU_Bufferexmem_result);
+	ALU.zero(ALU_BufferEXMEM_zero);
+
+	BufferEXMEM.clk(clk);
+	BufferEXMEM.reset(Controller_BufferEXMEM_ResetBufferEXMEM);
+	BufferEXMEM.enable(Controller_BufferEXMEM_enableBufferEXMEM);
+	BufferEXMEM.write(Controller_BufferEXMEM_WriteBufferEXMEM);
+	BufferEXMEM.MemReg(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferEXMEM.regWrite(BufferIDEX_BufferEXMEM_RegWrite);
+	BufferEXMEM.opcode(BufferIDEX_BufferEXMEM_opcode_output);
+    BufferEXMEM.DMWrite(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferEXMEM.DMenable(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferEXMEM.Branch(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferEXMEM.opdest(BufferIDEX_BufferEXMEM_destReg);
+	BufferEXMEM.zero(ALU_BufferEXMEM_zero);
+	BufferEXMEM.ALU_result(ALU_Bufferexmem_result);
+	BufferEXMEM.label_j_out(BufferEXMEM_MUX_op1);
+	
+
+	
+	
+
+	BufferEXMEM.regWrite_Output(BufferEXMEM_BufferMEMWB_RegWrite);
+	BufferEXMEM.MemReg_Output(BufferEXMEM_BufferMEMWB_MemReg);
+	BufferEXMEM.pcLoad(BufferIDEX_BufferEXMEM_pcLoad_output);
+	BufferEXMEM.opdest_Out(BufferEXMEM_BufferMEMWB_Opdest);
+	BufferEXMEM.BranchOUT(Brach_Mux_pcSRC);
+	BufferEXMEM.DMenableOUT(BufferEXMEM_DataMemory_DMenable);
+	BufferEXMEM.DMWriteOUT(BufferEXMEM_DataMemory_DMWrite);
+	BufferEXMEM.ALU_result_Out(BufferEXMEM_DataMemory_WriteData);
+	BufferEXMEM.dataDM(BufferIDEX_BufferEXMEM_dataDM);
+	BufferEXMEM.ALU_result_Out(BufferEXMEM_BufferMEMWB_address);
+
+	DM.clk(clk);
+	DM.memWrite(BufferEXMEM_DataMemory_DMWrite);
+	DM.enable(BufferEXMEM_DataMemory_DMenable);
+	DM.write_data(BufferIDEX_BufferEXMEM_dataDM);
+	DM.address(BufferEXMEM_DataMemory_WriteData);
+	DM.readData(DataMemory_BufferMEMWB_ReadData);
+
+	BufferMEMWB.clk(clk);
+	BufferMEMWB.RegWrite(BufferEXMEM_BufferMEMWB_RegWrite);
+	BufferMEMWB.memReg(BufferEXMEM_BufferMEMWB_MemReg);
+	BufferMEMWB.opDestino(BufferEXMEM_BufferMEMWB_Opdest);
+	BufferMEMWB.dataAdress(BufferEXMEM_BufferMEMWB_address);
+	BufferMEMWB.readData(DataMemory_BufferMEMWB_ReadData);
+	BufferMEMWB.regWriteOutput(BufferMEMWB_Registers_RegWrite);
+	BufferMEMWB.writeRegister(BufferMEMWB_Registers_writeRegister);
+	BufferMEMWB.memRegOut(BufferMEMWB_MUXDM_memtoreg);
+	BufferMEMWB.readDataOutput(BufferMEMWB_muxDM_readDataOutput);
+	BufferMEMWB.dataAdressOutput(BufferMEMWB_muxDM_dataAdressOutput);
+
+	MuxDM.memReg(BufferMEMWB_MUXDM_memtoreg);
+	MuxDM.in0(BufferMEMWB_muxDM_readDataOutput);
+	MuxDM.in1(BufferMEMWB_muxDM_dataAdressOutput);
+	MuxDM.out(MUXDM_Registers_writeData);
+
+//-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+	sc_start(100, SC_NS);
+
+	return 0;
+}

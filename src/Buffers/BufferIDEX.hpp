@@ -24,6 +24,7 @@ SC_MODULE(BufferIDEX) {
     // vem do bufferifid
     sc_in<sc_uint<6>>  destReg;
     sc_in<sc_int<32>> dataDM;
+    
     sc_out<sc_int<32>> dataDMout;
     sc_out<sc_int<32>> register1_Output;
     sc_out<sc_int<32>> register2_Output;

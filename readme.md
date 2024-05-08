@@ -31,7 +31,8 @@ Nosso modelo de instrução  é modelado como:
 
 ![Diagrama pipeline](Resources/images/mipsPipeLine.drawio.png "Diagrama de blocos do processador")
  
-
+![State Machine](Resources/images/MAQUINA%20DE%20ESTADOS.png "Maquina de estados do controller")
+ 
  # 
 # Detalhes do trabalho
 

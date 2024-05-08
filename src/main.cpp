@@ -116,7 +116,6 @@ int sc_main(int arg, char* argv[]) {
 	//Controller signals
 	
 	sc_signal<bool> Controller_reset; // Controller
-	sc_signal<bool> ALU_Controller_zero; // ULA
 	sc_signal<sc_uint<16>> Controller_BufferIDEX_pcJump; // BufferIDEX
 	sc_signal<bool> Controller_BufferIDEX_Branch; // BufferIDEX
 	sc_signal<bool> Controller_BufferIDEX_pcLoad; // BufferIDEX
@@ -272,14 +271,14 @@ int sc_main(int arg, char* argv[]) {
 	Controller.write_BufferMEMWB(Controller_BufferMEMWB_WriteBufferMEMWB);
 	Controller.reset_BufferMEMWB(Controller_BufferMEMWB_ResetBufferMEMWB);
 	Controller.aluOp(Controller_BufferIDEX_aluOp);
-	Controller.zero(ALU_Controller_zero);
+	Controller.zero(ALU_BufferEXMEM_zero);
+
 
 	ALU.clk(clk);
 	ALU.reset(Controller_BufferIDEX_resetALU);
 	ALU.opcode(BufferIDEX_ALU_opcode_output);
 	ALU.first_value(BufferIDEX_ALU_registerData1);
 	ALU.second_value(BufferIDEX_ALU_registerData2);
-	ALU.zero(ALU_Controller_zero);
 	ALU.output_value(ALU_Bufferexmem_result);
 	ALU.zero(ALU_BufferEXMEM_zero);
 
@@ -287,18 +286,22 @@ int sc_main(int arg, char* argv[]) {
 	BufferEXMEM.reset(Controller_BufferEXMEM_ResetBufferEXMEM);
 	BufferEXMEM.enable(Controller_BufferEXMEM_enableBufferEXMEM);
 	BufferEXMEM.write(Controller_BufferEXMEM_WriteBufferEXMEM);
-	BufferEXMEM.reset(Controller_BufferEXMEM_ResetBufferEXMEM);
-	BufferEXMEM.zero(ALU_BufferEXMEM_zero);
 	BufferEXMEM.MemReg(BufferIDEX_BufferEXMEM_memToReg_output);
+	BufferEXMEM.regWrite(BufferIDEX_BufferEXMEM_RegWrite);
 	BufferEXMEM.opcode(BufferIDEX_BufferEXMEM_opcode_output);
+    BufferEXMEM.DMWrite(BufferIDEX_BufferEXMEM_dmWrite_output);
+	BufferEXMEM.DMenable(BufferIDEX_BufferEXMEM_dmEnable_output);
+	BufferEXMEM.Branch(BufferIDEX_BufferEXMEM_Branch_output);
+	BufferEXMEM.opdest(BufferIDEX_BufferEXMEM_destReg);
+	BufferEXMEM.zero(ALU_BufferEXMEM_zero);
 	BufferEXMEM.ALU_result(ALU_Bufferexmem_result);
 	BufferEXMEM.label_j_out(BufferEXMEM_MUX_op1);
-	BufferEXMEM.opdest(BufferIDEX_BufferEXMEM_destReg);
-	BufferEXMEM.Branch(BufferIDEX_BufferEXMEM_Branch_output);
-	BufferEXMEM.DMenable(BufferIDEX_BufferEXMEM_dmEnable_output);
-	BufferEXMEM.DMWrite(BufferIDEX_BufferEXMEM_dmWrite_output);
-	BufferEXMEM.regWrite(BufferEXMEM_BufferMEMWB_RegWrite);
-	BufferEXMEM.regWrite_Output(BufferIDEX_BufferEXMEM_RegWrite);
+	
+
+	
+	
+
+	BufferEXMEM.regWrite_Output(BufferEXMEM_BufferMEMWB_RegWrite);
 	BufferEXMEM.MemReg_Output(BufferEXMEM_BufferMEMWB_MemReg);
 	BufferEXMEM.pcLoad(BufferIDEX_BufferEXMEM_pcLoad_output);
 	BufferEXMEM.opdest_Out(BufferEXMEM_BufferMEMWB_Opdest);
