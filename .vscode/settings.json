@@ -66,7 +66,8 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "temp": "c"
+        "temp": "c",
+        "bitset": "cpp"
     },
     "discord.enabled": true
 }

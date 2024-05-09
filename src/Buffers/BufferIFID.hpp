@@ -7,9 +7,6 @@ SC_MODULE(BufferIFID) {
     sc_in<bool>         write;
     sc_in<bool>         reset;
     sc_in<sc_uint<32>>  instruction;
-    sc_in<sc_uint<16>>   Address_Addr;
-
-    sc_out<sc_uint<16>> Address_Addr_Out;
     sc_out<sc_uint<32>> instruction_out;
     sc_out<sc_uint<6>>  readRegister1;
     sc_out<sc_uint<6>>  readRegister2;
@@ -20,7 +17,6 @@ SC_MODULE(BufferIFID) {
 
     sc_uint<6>          Intern_DestReg_out;
     sc_uint<16>         Intern_label_j;
-    sc_uint<16>          Intern_Address_Addr;
     sc_uint<32>         Intern_instruction;
     sc_uint<6>          Intern_readRegister1;
     sc_uint<6>          Intern_readRegister2;
@@ -29,7 +25,6 @@ SC_MODULE(BufferIFID) {
     enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
     void bufferProcess() {
         if(reset.read()){
-            Address_Addr_Out.write(0);
             instruction_out.write(0);
             readRegister1.write(0);
             readRegister2.write(0);
@@ -41,7 +36,6 @@ SC_MODULE(BufferIFID) {
         
         if(enable.read()){
             if(write.read()){
-            Intern_Address_Addr = Address_Addr.read();
             Intern_instruction = instruction.read();
             Intern_opcode = Intern_instruction.range(31, 28);
     
@@ -72,7 +66,6 @@ SC_MODULE(BufferIFID) {
             }
             }
             instruction_out.write(Intern_instruction);
-            Address_Addr_Out.write(Intern_Address_Addr);
             readRegister1.write(Intern_readRegister1);
             opcode_out.write(Intern_opcode);
             immediate_out.write(Intern_immediate);

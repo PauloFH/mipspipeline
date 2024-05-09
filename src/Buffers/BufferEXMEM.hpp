@@ -36,6 +36,7 @@ SC_MODULE(BufferEXMEM) {
     sc_in<sc_int<32>> ALU_result;
     sc_in<sc_int<32>> dataDM;
     sc_in<sc_uint<16>> label_j;
+   
     
    
     sc_out<sc_int<32>> ALU_result_Out;
