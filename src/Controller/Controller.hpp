@@ -23,7 +23,6 @@ SC_MODULE(Controller)
     };
 
     sc_in<bool> clk;
-
     sc_in<sc_uint<32>> instruction;
     sc_in<bool> zero;
     sc_in<bool> reset;
@@ -45,8 +44,13 @@ SC_MODULE(Controller)
     // Sinais da Data Memory
     sc_out<bool> dmEnable;
     sc_out<bool> dmWrite;
-
     sc_out<bool> memToReg;
+
+    // Sinais BufferIFID
+    sc_in<sc_uint<32>> Controller_instruction;
+    sc_out<bool> enable_BufferIFID;
+    sc_out<bool> write_BufferIFID;
+    sc_out<bool> reset_BufferIFID;
 
     // Sinais  BufferIDEX
     sc_out<bool> enable_BufferIDEX;
@@ -80,25 +84,33 @@ SC_MODULE(Controller)
     {
         imEnable.write(true);
         pcEnable.write(true);
+        enable_BufferIFID.write(true);
+        enable_BufferIDEX.write(true);
+        enable_BufferEXMEM.write(true);
+        enable_BufferMEMWB.write(true);
     }
     void ID()
     {
         imEnable.write(false);
         pcEnable.write(false);
-    }
-    void RE()
-    {
         regEnable.write(true);
-        regWrite.write(true);
-    }
-    void updateState()
-    {
 
         opcode = instruction.read().range(31, 28);
         label = instruction.read().range(27, 0);
         opd = instruction.read().range(27, 22);
         op1 = instruction.read().range(21, 16);
         op2 = instruction.read().range(15, 0);
+    }
+    void RE()
+    {
+        regEnable.write(true);
+        regWrite.write(true);
+        reset_BufferEXMEM.write(true);
+        reset_BufferIDEX.write(true);
+        reset_BufferMEMWB.write(true);
+    }
+    void updateState()
+    {
        
         if (opcode == beq_op)
         {
@@ -129,38 +141,41 @@ SC_MODULE(Controller)
                 state = 3;
             }
             break;
+
         case 3:
-            regEnable.write(true);
-            state = 4;
-            IF();
-            break;
+        ID();
+        state = 4;
+        break;
+
         case 4:
-            ID();
-            if (opcode == 7)
+            if (opcode == 9)
             { // Lw
                 regEnable.write(true);
                 regWrite.write(true);
                 dmEnable.write(true);
                 dmWrite.write(true);
-                regWrite.write(true);
-                state = 6;
+                 aluOp.write(opcode);
+                state = 5;
             }
-            else if (opcode == 8)
+            else if (opcode == 10)
             { // Sw
                 dmEnable.write(true);
                 dmWrite.write(false);
                 regWrite.write(true);
-                state = 7;
+                aluOp.write(opcode);
+                state = 6;
             }
-            else if (opcode == 9)
+            else if (opcode == 11)
             { // J
+                aluOp.write(opcode);
                 pcEnable.write(false);
                 pcjump.write(label);
                 restart = true;
-                state = 8;
+                state = 7;
             }
-            else if (opcode == 10)
+            else if (opcode == 12)
             { // bne
+                aluOp.write(opcode);
                 if (!zero.read())
                 {
                     pcEnable.write(false);
@@ -168,47 +183,53 @@ SC_MODULE(Controller)
                     aluReset.write(true);
                     restart = true;
                 }
-                state = 8;
+                state = 7;
             }
-            else if (opcode == 11)
+            else if (opcode == 13)
             { // beq
-                if (zero.read())
+                aluOp.write(opcode);
+                if (!zero.read())
                 {
                     pcEnable.write(false);
                     pcjump.write(label);
                     aluReset.write(true);
                     restart = true;
                 }
-                state = 8;
+                state = 7;
             }
-            else if (opcode > 0 && opcode < 7)
+            else if (opcode >= 0 && opcode < 9)
             { // ALU
+                aluOp.write(opcode);
                 regWrite.write(false);
                 regEnable.write(true);
-                regWrite.write(false);
                 state = 9;
             }
 
             break;
-        case 6: // LD STATE
+
+        case 5: // LW STATE
             regEnable.write(true);
             regWrite.write(true);
-            state = 10;
+            state = 9;
             break;
-        case 7: // ST STATE
+
+        case 6: // SW STATE
             dmEnable.write(true);
             dmWrite.write(true);
-            state = 10;
+            state = 9;
             break;
-        case 8:
+
+        case 7:
             state = 2;
             break;
-        case 9:
+
+        case 8:
             regEnable.write(true);
             regWrite.write(true);
-            state = 10;
+            state = 9;
             break;
-        case 10:
+
+        case 9:
             regEnable.write(false);
             regWrite.write(false);
             break;
