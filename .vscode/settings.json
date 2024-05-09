@@ -67,7 +67,8 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "temp": "c",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "*.inc": "cpp"
     },
     "discord.enabled": true
 }

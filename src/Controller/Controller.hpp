@@ -76,10 +76,13 @@ SC_MODULE(Controller)
     sc_uint<6> opd;
     sc_uint<6> op1;
     sc_uint<16> op2;
-
+    
+    sc_out<int> stateOut;
     int state = 0;
     bool restart;
 
+
+    
     void IF()
     {
         imEnable.write(true);
@@ -111,7 +114,8 @@ SC_MODULE(Controller)
     }
     void updateState()
     {
-       
+        stateOut.write(state);
+
         if (opcode == beq_op)
         {
             branch.write(true);

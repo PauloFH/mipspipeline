@@ -131,6 +131,7 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_uint<4>> Controller_BufferIDEX_aluOp; //Controller
 	sc_signal<bool> Controller_BufferIDEX_resetALU; //Controller
 	sc_signal<bool>Controller_BufferIDEX_RegWrite;
+	sc_signal<int> Controller_stateOut;
 	//ALU
 	sc_signal<bool> ALU_BufferEXMEM_zero;
 	sc_signal<sc_int<32>> ALU_Bufferexmem_result;
@@ -143,7 +144,6 @@ int sc_main(int arg, char* argv[]) {
 	sc_signal<sc_int<32>>BufferEXMEM_DataMemory_WriteData;
 	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_Opdest;
 	sc_signal<sc_int<32>> BufferEXMEM_BufferMEMWB_address;
-
 	//DataMemory
 	sc_signal<sc_int<32>> DataMemory_BufferMEMWB_ReadData;
 
@@ -247,9 +247,9 @@ int sc_main(int arg, char* argv[]) {
 	Controller.pcEnable(Controller_PC_enable);
 	Controller.PcLoad(Controller_BufferIDEX_pcLoad);
 	Controller.pcReset(Controller_PC_reset);
-	//Controller.BufferIFID_enable(Controller_BufferIFID_enable);
-	//Controller.BufferIFID_reset(Controller_BufferIFID_reset);
-	//Controller.BufferIFID_write(Controller_BufferIFID_write);
+	Controller.enable_BufferIFID(Controller_BufferIFID_enable);
+	Controller.write_BufferIFID(Controller_BufferIFID_reset);
+	Controller.reset_BufferIFID(Controller_BufferIFID_write);
 	Controller.regEnable(Controller_Registers_enable);
 	Controller.regWrite(Controller_BufferIDEX_RegWrite);
 	Controller.imEnable(Controller_IM_enable);
@@ -270,7 +270,7 @@ int sc_main(int arg, char* argv[]) {
 	Controller.reset_BufferMEMWB(Controller_BufferMEMWB_ResetBufferMEMWB);
 	Controller.aluOp(Controller_BufferIDEX_aluOp);
 	Controller.zero(ALU_BufferEXMEM_zero);
-
+	Controller.stateOut(Controller_stateOut);
 
 	ALU.clk(clk);
 	ALU.reset(Controller_BufferIDEX_resetALU);
@@ -333,9 +333,6 @@ int sc_main(int arg, char* argv[]) {
 	MuxDM.out(MUXDM_Registers_writeData);
 
 //-----------------------------------------------------------------------------------------------
-
-
-
 
 
 
