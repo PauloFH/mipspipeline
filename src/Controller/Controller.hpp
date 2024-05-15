@@ -26,50 +26,33 @@ SC_MODULE(Controller)
     sc_in<sc_uint<32>> instruction;
     sc_in<bool> zero;
     sc_in<bool> reset;
-
-    // Sinais do PC
     sc_out<bool> pcReset;
     sc_out<bool> pcEnable;
     sc_out<bool> PcLoad;
     sc_out<sc_uint<16>> pcjump;
-
-    // Sinais dos Registradores
     sc_out<bool> regEnable;
     sc_out<bool> regWrite;
-
-    // Sinais da Instruction Memory
     sc_out<bool> imEnable;
     sc_out<bool> imwrite;
-
-    // Sinais da Data Memory
     sc_out<bool> dmEnable;
     sc_out<bool> dmWrite;
     sc_out<bool> memToReg;
-
-    // Sinais BufferIFID
-    sc_in<sc_uint<32>> Controller_instruction;
     sc_out<bool> enable_BufferIFID;
     sc_out<bool> write_BufferIFID;
     sc_out<bool> reset_BufferIFID;
-
-    // Sinais  BufferIDEX
     sc_out<bool> enable_BufferIDEX;
     sc_out<bool> write_BufferIDEX;
     sc_out<bool> reset_BufferIDEX;
     sc_out<bool> branch;
-    // Sinais BufferEXMEM
-
     sc_out<bool> enable_BufferEXMEM;
     sc_out<bool> write_BufferEXMEM;
     sc_out<bool> reset_BufferEXMEM;
-    // Sinais BufferMEMWB
     sc_out<bool> enable_BufferMEMWB;
     sc_out<bool> write_BufferMEMWB;
     sc_out<bool> reset_BufferMEMWB;
-    // Sinais do ALU
     sc_out<sc_uint<4>> aluOp;
     sc_out<bool> aluReset;
-    sc_out<sc_uint<22>> addressOut;
+    //sc_out<sc_uint<22>> addressOut;
     // locais
     sc_uint<32> label;
     sc_uint<4> opcode;
@@ -126,7 +109,7 @@ SC_MODULE(Controller)
         }
         if(opcode == lw_op || opcode == sw_op)
         {
-              addressOut.write(instruction.read().range(21, 0));
+              //addressOut.write(instruction.read().range(21, 0));
         }
         switch (state)
         {
