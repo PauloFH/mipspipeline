@@ -6,7 +6,10 @@ SC_MODULE(Addr){
     sc_out<sc_uint<16>> output_value;
     
     void addr(){
+       
         output_value.write(first_value.read() + 1);
+         cout << "Passa Instrução" << endl;
+
     }
 
     SC_CTOR(Addr){

@@ -336,10 +336,13 @@ int sc_main(int arg, char* argv[]) {
 	MuxDM.out(MUXDM_Registers_writeData);
 
 //-----------------------------------------------------------------------------------------------
-
-
-
-	sc_start(100, SC_NS);
+while (not sc_end_of_simulation_invoked()) {
+		clk = 0;
+		sc_start(1, SC_NS);
+		clk = 1;
+		sc_start(1, SC_NS);
+	}
+	
 
 	return 0;
 }

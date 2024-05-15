@@ -55,7 +55,25 @@ SC_MODULE(BufferEXMEM) {
 
 
     void bufferEXMEM() {
-       
+    cout << "-----------------------------------------------------------------------" << endl;
+    cout << "Buffer EXMEM" << endl;
+    cout << "clk: " << clk.read() << endl;
+    cout << "reset: " << reset.read() << endl;
+    cout << "enable: " << enable.read() << endl;
+    cout << "write: " << write.read() << endl;
+    cout << "MemReg: " << MemReg.read() << endl;
+    cout << "regWrite: " << regWrite.read() << endl;
+    cout << "opcode: " << opcode.read() << endl;
+    cout << "DMWrite: " << DMWrite.read() << endl;
+    cout << "DMenable: " << DMenable.read() << endl;
+    cout << "Branch: " << Branch.read() << endl;
+    cout << "opdest: " << opdest.read() << endl;
+    cout << "zero: " << zero.read() << endl;
+    cout << "pcLoad: " << pcLoad.read() << endl;
+    cout << "ALU_result: " << ALU_result.read() << endl;
+    cout << "dataDM: " << dataDM.read() << endl;
+    cout << "label_j: " << label_j.read() << endl << "--------------------------------------------------------------------" << endl;
+
         if (reset.read() == true) {
             Intern_ALU_result = 0;
             Intern_label_j = 0;
@@ -111,6 +129,7 @@ SC_MODULE(BufferEXMEM) {
             DMenableOUT.write(DMenable.read());
             regWrite_Output.write(regWrite.read());
             MemReg_Output.write(MemReg.read());
+
             }else{
             ALU_result_Out.write(Intern_ALU_result);
             label_j_out.write(Intern_label_j);
@@ -122,6 +141,7 @@ SC_MODULE(BufferEXMEM) {
             dataDMOut.write(Intern_dataDM);
             }
             }
+
         }
     SC_CTOR(BufferEXMEM) {
         SC_METHOD(bufferEXMEM);

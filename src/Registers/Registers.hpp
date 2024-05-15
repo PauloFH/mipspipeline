@@ -21,7 +21,7 @@ SC_MODULE(Registers)
     sc_int<32> registers[NUM_REGISTERS];
     sc_int<32> readData1_intern, readData2_intern;
     void writeRegistrator()
-    {
+    {   cout << "writeRegistrator" << endl;
         if (enable.read())
         {
 
@@ -33,7 +33,7 @@ SC_MODULE(Registers)
     }
 
     void readRegistrator()
-    {
+    {   cout << "readRegistrator" << endl;
         if (enable.read())
         {
             if (opcode.read() == 0b0111)
@@ -62,6 +62,11 @@ SC_MODULE(Registers)
                 readData1.write(registers[readRegister1.read()]);
                 readData2.write(registers[readRegister2.read()]);
             }
+        }
+        cout << "Registers:" << endl;
+        for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i)
+        {  
+            cout << "registers[" << i << "]: " << registers[i] << endl;
         }
     }
 

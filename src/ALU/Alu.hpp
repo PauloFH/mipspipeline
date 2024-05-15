@@ -13,7 +13,7 @@ SC_MODULE(Alu){
     sc_int<32> internDataA, internDataB, internResult;
 
     void aluOperation(){
-
+		cout << "ALU Operation" << endl;
         internDataA = first_value.read();
         internDataB = second_value.read();
 		if(reset.read()){
@@ -21,20 +21,26 @@ SC_MODULE(Alu){
 		}else{
        		switch(opcode.read()){
 				case and_op:
+
 					internResult = internDataA & internDataB;
 					output_value.write(internResult);
+					cout << "AND "<< internDataA<< " e "<< internDataB <<" resultou em:"  << internResult<< endl;
 					break;
 				case or_op:
 					internResult = internDataA | internDataB;
 					output_value.write(internResult);
+			cout << "OR "<< internDataA<< " ou "<< internDataB <<" resultou em:"  << internResult<< endl;	
 					break;					
 				case xor_op:
 					internResult = internDataA ^ internDataB;
 					output_value.write(internResult);
+			cout << "XOR "<< internDataA<< " e "<< internDataB <<" resultou em:"  << internResult<< endl;
+					
 					break;
 				case not_op:
 					internResult = ~internDataA;
 					output_value.write(internResult);
+			cout << "NOT "<< internDataA <<" resultou em:"  << internResult<< endl;
 					break;
 				case slt_op:
 					internResult = internDataA - internDataB;
@@ -45,28 +51,37 @@ SC_MODULE(Alu){
 							zero.write(false);
 						}
 					output_value.write(internResult);
+				cout << "SLT comparação entre "<< internDataA<< " e " <<internDataB <<"resultou em: "  << zero << endl;
 					break;
 				case add_op:
 				case addi_op:
 					internResult = internDataA + internDataB;
 					output_value.write(internResult);
+ 				cout << "add "<< internDataA<< " + "<< internDataB <<"resultou em:"  << internResult<< endl;
 					break;
 				case sub_op:
 					internResult = internDataA - internDataB;
 					output_value.write(internResult);
+				cout << "sub "<< internDataA<< " + "<< internDataB <<"resultou em:"  << internResult<< endl;
 					break;
 				case beq_op:
 				case bne_op:
+		
 					if(internDataA == internDataB){
 						zero.write(true);
 					}else{
 						zero.write(false);
 					}
 					break;
+cout << "salto condicional "<< internDataA<< " + "<< internDataB <<"resultou em: "  << zero<< endl;
+		
 				case lw_op:
 				case sw_op:
+				
 					internResult = internDataA + internDataB;
 					output_value.write(internResult);
+				cout << "lw e sw destino/origem "<< internDataA<< " + "<< internDataB <<"resultou em: "  << internResult<< endl;
+
 					break;
 			}
 		}

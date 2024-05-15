@@ -7,6 +7,7 @@ SC_MODULE(MuxDM) {
     sc_out<sc_int<32>> out; 
 
     void process() {
+        cout << "MuxDM" << endl;
         if (memReg.read() == 0) {
             out.write(in0.read()); 
         } else {

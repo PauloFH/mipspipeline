@@ -13,11 +13,18 @@ SC_MODULE(ProgramCounter) {
     sc_uint<16> currentInstruction;
 
     void counterIntruction() {
+        cout << "Program Counter" << endl;
         currentInstruction = 0;
         if(reset.read()){
             currentInstruction = 0;
             pcOutput.write(currentInstruction);
-        }else if(enable.read()){
+        }else
+        if(load.read()){
+            cout << "load" << endl;
+            currentInstruction = pcInput.read();
+            pcOutput.write(currentInstruction);
+
+        } if(enable.read()){
             currentInstruction = pcInput.read();
             pcOutput.write(currentInstruction);
         }

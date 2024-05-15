@@ -7,6 +7,7 @@ SC_MODULE(Mux) {
     sc_out<sc_uint<16>> out; 
 
     void process() {
+        cout << "Mux" << endl;
         if (pcSRC.read() == 0) {
             out.write(in0.read()); 
         } else {

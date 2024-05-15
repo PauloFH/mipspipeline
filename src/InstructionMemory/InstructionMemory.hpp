@@ -25,7 +25,16 @@ SC_MODULE(InstructionMemory)
         sensitive << clk.pos();
     }
     void fetchInstruction()
-    {
+    
+    {   
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Instruction Memory" << endl
+                << "clk: " << clk.read() << endl
+                << "enable: " << enable.read() << endl
+                << "write: " << write.read() << endl
+                << "address: " << address.read() << endl;
+        cout << "-----------------------------------------------------------------------" << endl;
+        
         while (true)
         {
             wait();

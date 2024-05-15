@@ -58,6 +58,29 @@ SC_MODULE(BufferIDEX) {
     }
 
     void update() {
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "BufferIDEX" << endl;
+        cout << "clk: " << clk.read() << endl;
+        cout << "enable: " << enable.read() << endl;
+        cout << "write: " << write.read() << endl;
+        cout << "reset: " << reset.read() << endl;
+        cout << "opcode: " << opcode.read() << endl;
+        cout << "pcLoad: " << pcLoad.read() << endl;
+        cout << "dmEnable: " << dmEnable.read() << endl;
+        cout << "dmWrite: " << dmWrite.read() << endl;
+        cout << "aluReset: " << aluReset.read() << endl;
+        cout << "aluOp: " << aluOp.read() << endl;
+        cout << "Branch: " << Branch.read() << endl;
+        cout << "memToReg: " << memToReg.read() << endl;
+        cout << "pcJump: " << pcJump.read() << endl;
+        cout << "label_j: " << label_j.read() << endl;
+        cout << "regWrite: " << regWrite.read() << endl;
+        cout << "registerData1: " << registerData1.read() << endl;
+        cout << "registerData2: " << registerData2.read() << endl;
+        cout << "destReg: " << destReg.read() << endl;
+        cout << "dataDM: " << dataDM.read() << endl;
+        cout << "-----------------------------------------------------------------------" << endl;
+        
         if (reset.read()) {
                         Intern_dmWrite = 0;
             Intern_dmEnable = 0;

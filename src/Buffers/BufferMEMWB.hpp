@@ -27,6 +27,15 @@ SC_MODULE(BufferMEMWB) {
     }
 
     void readMemory() {
+cout << "-----------------------------------------------------------------------" << endl;
+            cout << "Buffer MEMWB" << endl;
+            cout << "RegWrite: " << RegWrite.read() << endl;
+            cout << "clk: " << clk.read() << endl;
+            cout << "memReg: " << memReg.read() << endl;
+            cout << "opDestino: " << opDestino.read() << endl;
+            cout << "dataAdress: " << dataAdress.read() << endl;
+            cout << "readData: " << readData.read() << endl;
+            cout << "-----------------------------------------------------------------------" << endl;
                 internoDataAdress = dataAdress.read();
                 internoOpDestino = opDestino.read();
                 internoReadData = readData.read();

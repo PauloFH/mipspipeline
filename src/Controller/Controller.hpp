@@ -96,7 +96,13 @@ SC_MODULE(Controller)
         reset_BufferMEMWB.write(true);
     }
     void updateState()
-    {
+    {cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Controller" << endl;        
+        cout << "clk: " << clk.read() << endl;
+        cout << "instruction: " << instruction.read() << endl;
+        cout << "zero: " << zero.read() << endl;
+        cout << "reset: " << reset.read() << endl;
+       cout << "-----------------------------------------------------------------------" << endl; 
         stateOut.write(state);
 
         if (opcode == beq_op)
