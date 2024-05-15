@@ -20,6 +20,7 @@ SC_MODULE(Registers)
     sc_int<32> Intern_immediate;
     sc_int<32> registers[NUM_REGISTERS];
     sc_int<32> readData1_intern, readData2_intern;
+    
     void writeRegistrator()
     {   cout << "writeRegistrator" << endl;
         if (enable.read())

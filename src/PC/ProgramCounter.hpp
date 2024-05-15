@@ -14,7 +14,6 @@ SC_MODULE(ProgramCounter) {
 
     void counterIntruction() {
         cout << "Program Counter" << endl;
-        currentInstruction = 0;
         if(reset.read()){
             currentInstruction = 0;
             pcOutput.write(currentInstruction);
@@ -31,7 +30,7 @@ SC_MODULE(ProgramCounter) {
     }
     
     SC_CTOR(ProgramCounter) {
-       currentInstruction = 0; 
+       currentInstruction = 1; 
         SC_METHOD(counterIntruction);
         sensitive << clk.pos();
         sensitive << reset;

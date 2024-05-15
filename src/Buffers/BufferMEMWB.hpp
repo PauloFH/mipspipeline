@@ -1,13 +1,14 @@
 #include <systemc.h>
 
-SC_MODULE(BufferMEMWB) {
+SC_MODULE(BufferMEMWB)
+{
 
     sc_in<bool> RegWrite;
     sc_in<bool> clk;
     sc_in<bool> memReg;
     sc_in<sc_uint<6>> opDestino;
     sc_in<sc_int<32>> dataAdress;
-    sc_in<sc_int<32>> readData; 
+    sc_in<sc_int<32>> readData;
 
     sc_out<bool> regWriteOutput;
     sc_out<sc_uint<6>> writeRegister;
@@ -19,30 +20,32 @@ SC_MODULE(BufferMEMWB) {
     sc_int<32> internoDataAdress;
     sc_uint<32> internoOpDestino;
 
-    SC_CTOR(BufferMEMWB) {
+    SC_CTOR(BufferMEMWB)
+    {
 
         SC_METHOD(readMemory);
         sensitive << clk.pos();
-
     }
 
-    void readMemory() {
-cout << "-----------------------------------------------------------------------" << endl;
-            cout << "Buffer MEMWB" << endl;
-            cout << "RegWrite: " << RegWrite.read() << endl;
-            cout << "clk: " << clk.read() << endl;
-            cout << "memReg: " << memReg.read() << endl;
-            cout << "opDestino: " << opDestino.read() << endl;
-            cout << "dataAdress: " << dataAdress.read() << endl;
-            cout << "readData: " << readData.read() << endl;
-            cout << "-----------------------------------------------------------------------" << endl;
-                internoDataAdress = dataAdress.read();
-                internoOpDestino = opDestino.read();
-                internoReadData = readData.read();
-                writeRegister.write(internoOpDestino);
-                regWriteOutput.write(RegWrite);
-                memRegOut.write(memReg); 
-                readDataOutput.write(readData);
-                dataAdressOutput.write(dataAdress);
-        }
-    };
+    void readMemory()
+    {
+        internoDataAdress = dataAdress.read();
+        internoOpDestino = opDestino.read();
+        internoReadData = readData.read();
+        writeRegister.write(internoOpDestino);
+        regWriteOutput.write(RegWrite);
+        memRegOut.write(memReg);
+        readDataOutput.write(readData);
+        dataAdressOutput.write(dataAdress);
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Buffer MEMWB" << endl;
+        cout << "RegWrite: " << RegWrite.read() << endl;
+        cout << "clk: " << clk.read() << endl;
+        cout << "memReg: " << memReg.read() << endl;
+        cout << "opDestino: " << opDestino.read() << endl;
+        cout << "dataAdress: " << dataAdress.read() << endl;
+        cout << "readData: " << readData.read() << endl;
+        cout << "-----------------------------------------------------------------------" << endl;
+        
+    }
+};

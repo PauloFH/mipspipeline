@@ -24,14 +24,6 @@ SC_MODULE(BufferIFID) {
     sc_int<16>          Intern_immediate;
     enum  OpC {zero_op = 0b0000,and_op = 0b0001,or_op = 0b0010,xor_op = 0b0011,not_op = 0b0100,slt_op = 0b0101,cmp_op = 0b0101,add_op = 0b0110,addi_op = 0b0111,sub_op = 0b1000,lw_op = 0b1001,sw_op = 0b1010,j_op = 0b1011,beq_op = 0b1100,bne_op = 0b1101};
     void bufferProcess() {
-        cout << "-----------------------------------------------------------------------" << endl;
-        cout << "Buffer IFID" << endl;
-        cout << "clk: " << clk.read() << endl;
-        cout << "enable: " << enable.read() << endl;
-        cout << "write: " << write.read() << endl;
-        cout << "reset: " << reset.read() << endl;
-        cout << "instruction: " << instruction.read() << endl;
-        cout << "-----------------------------------------------------------------------" << endl;
         if(reset.read()){
             instruction_out.write(0);
             readRegister1.write(0);
@@ -43,7 +35,6 @@ SC_MODULE(BufferIFID) {
         }
         
         if(enable.read()){
-            if(write.read()){
             Intern_instruction = instruction.read();
             Intern_opcode = Intern_instruction.range(31, 28);
     
@@ -82,8 +73,16 @@ SC_MODULE(BufferIFID) {
             readRegister2.write(Intern_readRegister2);
             DestReg_out.write(Intern_DestReg_out);
             label_j.write(Intern_label_j);
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Buffer IFID" << endl;
+        cout << "clk: " << clk.read() << endl;
+        cout << "enable: " << enable.read() << endl;
+        cout << "write: " << write.read() << endl;
+        cout << "reset: " << reset.read() << endl;
+        cout << "instruction: " << instruction.read() << endl;
+        cout << "-----------------------------------------------------------------------" << endl;
+        
         }
-    }
 
      SC_CTOR(BufferIFID) {
         SC_METHOD(bufferProcess);

@@ -69,10 +69,14 @@ SC_MODULE(Controller)
     void IF()
     {
         imEnable.write(true);
+        imwrite.write(true);
         pcEnable.write(true);
         enable_BufferIFID.write(true);
         enable_BufferIDEX.write(true);
+        write_BufferIFID.write(true);
         enable_BufferEXMEM.write(true);
+        write_BufferEXMEM.write(true);
+        write_BufferMEMWB.write(true);
         enable_BufferMEMWB.write(true);
     }
     void ID()
@@ -80,7 +84,6 @@ SC_MODULE(Controller)
         imEnable.write(false);
         pcEnable.write(false);
         regEnable.write(true);
-
         opcode = instruction.read().range(31, 28);
         label = instruction.read().range(27, 0);
         opd = instruction.read().range(27, 22);
@@ -91,19 +94,9 @@ SC_MODULE(Controller)
     {
         regEnable.write(true);
         regWrite.write(true);
-        reset_BufferEXMEM.write(true);
-        reset_BufferIDEX.write(true);
-        reset_BufferMEMWB.write(true);
     }
     void updateState()
-    {cout << "-----------------------------------------------------------------------" << endl;
-        cout << "Controller" << endl;        
-        cout << "clk: " << clk.read() << endl;
-        cout << "instruction: " << instruction.read() << endl;
-        cout << "zero: " << zero.read() << endl;
-        cout << "reset: " << reset.read() << endl;
-       cout << "-----------------------------------------------------------------------" << endl; 
-        stateOut.write(state);
+    {        stateOut.write(state);
 
         if (opcode == beq_op)
         {
@@ -122,10 +115,13 @@ SC_MODULE(Controller)
         case 0:
             IF();
             state = 1;
+                        cout << "state 0" << endl;
             break;
+
         case 1:
             ID();
             state = 2;
+            cout << "state 1" << endl;
             break;
         case 2:
             if (!restart)
@@ -133,10 +129,13 @@ SC_MODULE(Controller)
                 RE();
                 state = 3;
             }
+            cout << "state 2" << endl;
             break;
 
         case 3:
+
         ID();
+        cout << "opcode: " << opcode << endl;
         state = 4;
         break;
 
@@ -190,7 +189,7 @@ SC_MODULE(Controller)
                 }
                 state = 7;
             }
-            else if (opcode >= 0 && opcode < 9)
+            else if (opcode > 0 && opcode < 9)
             { // ALU
                 aluOp.write(opcode);
                 regWrite.write(false);
@@ -213,6 +212,7 @@ SC_MODULE(Controller)
             break;
 
         case 7:
+        aluReset.write(false);
             state = 2;
             break;
 
@@ -226,9 +226,18 @@ SC_MODULE(Controller)
             regEnable.write(false);
             regWrite.write(false);
             break;
+            sc_stop();
         default:
             break;
         }
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Controller" << endl;        
+        cout << "clk: " << clk.read() << endl;
+        cout << "instruction: " << instruction.read() << endl;
+        cout << "zero: " << zero.read() << endl;
+        cout << "reset: " << reset.read() << endl;
+       cout << "-----------------------------------------------------------------------" << endl; 
+
     }
 
     SC_CTOR(Controller)

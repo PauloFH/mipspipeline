@@ -14,7 +14,8 @@
 #include<BufferEXMEM.hpp>
 #include<BufferMEMWB.hpp>
 
-int sc_main(int arg, char* argv[]) {
+int sc_main(int, char*[]) {
+	Controller Controller("Controller");
 
 	ProgramCounter PC("PC");
 
@@ -30,7 +31,7 @@ int sc_main(int arg, char* argv[]) {
 
 	BufferIDEX BufferIDEX("BufferIDEX");
 
-	Controller Controller("Controller");
+	
 
 	Alu ALU("ALU");
 
@@ -248,8 +249,8 @@ int sc_main(int arg, char* argv[]) {
 	Controller.PcLoad(Controller_BufferIDEX_pcLoad);
 	Controller.pcReset(Controller_PC_reset);
 	Controller.enable_BufferIFID(Controller_BufferIFID_enable);
-	Controller.write_BufferIFID(Controller_BufferIFID_reset);
-	Controller.reset_BufferIFID(Controller_BufferIFID_write);
+	Controller.write_BufferIFID(Controller_BufferIFID_write);
+	Controller.reset_BufferIFID(Controller_BufferIFID_reset);
 	Controller.regEnable(Controller_Registers_enable);
 	Controller.regWrite(Controller_BufferIDEX_RegWrite);
 	Controller.imEnable(Controller_IM_enable);
@@ -336,10 +337,10 @@ int sc_main(int arg, char* argv[]) {
 	MuxDM.out(MUXDM_Registers_writeData);
 
 //-----------------------------------------------------------------------------------------------
-while (not sc_end_of_simulation_invoked()) {
-		clk = 0;
-		sc_start(1, SC_NS);
+for (int i = 0; i < 5; i++) {
 		clk = 1;
+		sc_start(1, SC_NS);
+		clk = 0;
 		sc_start(1, SC_NS);
 	}
 	

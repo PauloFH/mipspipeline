@@ -7,16 +7,21 @@ SC_MODULE(Mux) {
     sc_out<sc_uint<16>> out; 
 
     void process() {
-        cout << "Mux" << endl;
+              
         if (pcSRC.read() == 0) {
             out.write(in0.read()); 
         } else {
             out.write(in1.read());
+            
         }
+         cout << "-----------------------------------------------------------------------" << endl;
+           cout << "Mux" << endl;
+           pcSRC.read() == 0 ? cout << "pcSRC: 0" << endl : cout << "pcSRC: 1" << endl;
+          cout << "-----------------------------------------------------------------------" << endl;
     }
 
     SC_CTOR(Mux) {
         SC_METHOD(process);
-        sensitive << pcSRC << in0 << in1;
+        sensitive << pcSRC;
     }
 };

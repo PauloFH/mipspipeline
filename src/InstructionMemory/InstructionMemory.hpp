@@ -21,20 +21,14 @@ SC_MODULE(InstructionMemory)
         SC_CTOR(InstructionMemory)
     {
         convertAsmInInstructions();
+
         SC_THREAD(fetchInstruction);
         sensitive << clk.pos();
     }
     void fetchInstruction()
-    
+
     {   
-        cout << "-----------------------------------------------------------------------" << endl;
-        cout << "Instruction Memory" << endl
-                << "clk: " << clk.read() << endl
-                << "enable: " << enable.read() << endl
-                << "write: " << write.read() << endl
-                << "address: " << address.read() << endl;
-        cout << "-----------------------------------------------------------------------" << endl;
-        
+
         while (true)
         {
             wait();
@@ -50,6 +44,14 @@ SC_MODULE(InstructionMemory)
                 sc_stop();
             }
         }
+        cout << "-----------------------------------------------------------------------" << endl;
+        cout << "Instruction Memory" << endl
+                << "clk: " << clk.read() << endl
+                << "enable: " << enable.read() << endl
+                << "write: " << write.read() << endl
+                << "address: " << address.read() << endl;
+        cout << "-----------------------------------------------------------------------" << endl;
+        
     }
 
 public:
@@ -99,7 +101,7 @@ public:
         for (int i = 0; i < int(dataoutput.size()); i++)
         {
             memory[i] = dataoutput[i];
-            cout << "linha de codigo " << i << " virou instrução: " << bitset<32>(dataoutput[i]) << endl;
+            cout << "linha de codigo " << i << " virou instrução: " << bitset<32>(dataoutput[i]) << " : " << dataoutput[i]<< endl;
         }
     }
     vector<string> readDocument(const std::string &filename)
@@ -117,7 +119,7 @@ public:
                     ct = ct + 0b0000000000000001;
                     if (line.find(":"))
                     {
-                        line.substr(0, line.size() - 1);
+                        line = line.substr(0, line.size() - 1);
                         jumpLocations.insert({line, ct});
                     }
                     lines.push_back(line); // Adiciona a linha lida ao vetor de linhas
