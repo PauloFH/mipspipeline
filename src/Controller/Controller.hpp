@@ -226,8 +226,8 @@ SC_MODULE(Controller)
             break;
 
         case 9:
-            regEnable.write(false);
-            regWrite.write(false);
+            regEnable.write(true);
+            regWrite.write(true);
             break;
 
         default:

@@ -23,13 +23,35 @@ SC_MODULE(Registers)
     
     void writeRegistrator()
     {   cout << "writeRegistrator" << endl;
+
         if (enable.read())
         {
 
             if (RegWrite.read() == true)
-            {
+            {   
                 registers[writeRegister.read()] = writeData.read();
             }
+
+        }
+                cout << "-----------------------------------------------------------------------"<< endl;
+        cout << "Registers" << endl;
+        cout << "clk: " << clk.read() << endl;
+        cout << "RegWrite: " << RegWrite.read() << endl;
+        cout << "enable: " << enable.read() << endl;
+        cout << "opcode: " << opcode.read() << endl;
+        cout << "destReg: " << destReg.read() << endl;
+        cout << "writeRegister: " << writeRegister.read() << endl;
+        cout << "writeData: " << writeData.read() << endl;
+        cout << "readRegister1: " << readRegister1.read() << endl;
+        cout << "readRegister2: " << readRegister2.read() << endl;
+        cout << "immediate: " << immediate.read() << endl;
+        cout << "readData1: " << readData1.read() << endl;
+        cout << "readData2: " << readData2.read() << endl;
+        cout << "writeDataOut: " << writeDataOut.read() << endl;
+                cout << "-----------------------------------------------------------------------"<< endl;
+        for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i)
+        {  
+            cout << "registers[" << i << "]: " << registers[i] << endl;
         }
     }
 
@@ -94,9 +116,9 @@ SC_MODULE(Registers)
         }
 
         SC_METHOD(writeRegistrator);
-        sensitive << clk.pos();
+        sensitive << clk.pos()<< writeData << RegWrite << writeRegister ;
         
         SC_METHOD(readRegistrator);
-        sensitive << readRegister1 << readRegister2 << writeRegister << writeData << RegWrite;
+        sensitive << readRegister1 << readRegister2;
     }
 };

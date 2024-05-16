@@ -334,6 +334,7 @@ int sc_main(int, char*[]) {
 	MuxDM.in0(BufferMEMWB_muxDM_readDataOutput);
 	MuxDM.in1(BufferMEMWB_muxDM_dataAdressOutput);
 	MuxDM.out(MUXDM_Registers_writeData);
+	MuxDM.clk(clk);
 
 //-----------------------------------------------------------------------------------------------
 for (int i = 0; i < 50; i++) {
