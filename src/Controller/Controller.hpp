@@ -71,6 +71,7 @@ SC_MODULE(Controller)
         pcEnable.write(true);
         enable_BufferIFID.write(true);
         enable_BufferIDEX.write(true);
+        write_BufferIDEX.write(true);
         write_BufferIFID.write(true);
         enable_BufferEXMEM.write(true);
         write_BufferEXMEM.write(true);
@@ -125,9 +126,11 @@ SC_MODULE(Controller)
             if (!restart)
             {
                 RE();
-                state = 3;
+                restart = false;
+                state = 2;
             }
             cout << "state 2" << endl;
+            state = 3;
             break;
 
         case 3:
@@ -193,7 +196,7 @@ SC_MODULE(Controller)
                 aluOp.write(opcode);
                 regWrite.write(false);
                 regEnable.write(true);
-                state = 9;
+                state = 8;
             }
 
             break;
@@ -225,7 +228,7 @@ SC_MODULE(Controller)
             regEnable.write(false);
             regWrite.write(false);
             break;
-            sc_stop();
+
         default:
             break;
         }

@@ -64,7 +64,22 @@ SC_MODULE(Registers)
                 readData2.write(registers[readRegister2.read()]);
             }
         }
-        cout << "Registers:" << endl;
+        cout << "-----------------------------------------------------------------------"<< endl;
+        cout << "Registers" << endl;
+        cout << "clk: " << clk.read() << endl;
+        cout << "RegWrite: " << RegWrite.read() << endl;
+        cout << "enable: " << enable.read() << endl;
+        cout << "opcode: " << opcode.read() << endl;
+        cout << "destReg: " << destReg.read() << endl;
+        cout << "writeRegister: " << writeRegister.read() << endl;
+        cout << "writeData: " << writeData.read() << endl;
+        cout << "readRegister1: " << readRegister1.read() << endl;
+        cout << "readRegister2: " << readRegister2.read() << endl;
+        cout << "immediate: " << immediate.read() << endl;
+        cout << "readData1: " << readData1.read() << endl;
+        cout << "readData2: " << readData2.read() << endl;
+        cout << "writeDataOut: " << writeDataOut.read() << endl;
+                cout << "-----------------------------------------------------------------------"<< endl;
         for (sc_uint<6> i = 0; i < NUM_REGISTERS; ++i)
         {  
             cout << "registers[" << i << "]: " << registers[i] << endl;

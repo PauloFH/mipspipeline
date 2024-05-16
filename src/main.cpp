@@ -260,9 +260,9 @@ int sc_main(int, char*[]) {
 	Controller.memToReg(Controller_BufferIDEX_MemtoReg);
 	Controller.pcjump(Controller_BufferIDEX_pcJump);
 	Controller.branch(Controller_BufferIDEX_Branch);
-	Controller.enable_BufferIDEX(Controller_BufferIDEX_EnableBufferIDEX);
-	Controller.write_BufferIDEX(Controller_BufferIDEX_WriteBufferIDEX);
-	Controller.reset_BufferIDEX(Controller_BufferIDEX_ResetBufferIDEX);
+	Controller.enable_BufferIDEX(Controller_BufferIDEX_enable);
+	Controller.write_BufferIDEX(Controller_BufferIDEX_write);
+	Controller.reset_BufferIDEX(Controller_BufferIDEX_reset);
 	Controller.enable_BufferEXMEM(Controller_BufferEXMEM_enableBufferEXMEM);
 	Controller.write_BufferEXMEM(Controller_BufferEXMEM_WriteBufferEXMEM);
 	Controller.reset_BufferEXMEM(Controller_BufferEXMEM_ResetBufferEXMEM);

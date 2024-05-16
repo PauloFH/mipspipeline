@@ -69,7 +69,6 @@ SC_MODULE(BufferIFID) {
             opcode_out.write(Intern_opcode);
             immediate_out.write(Intern_immediate);
             readRegister2.write(Intern_readRegister2);
-            Intern_readRegister2 = Intern_instruction.range(20, 16);
             readRegister2.write(Intern_readRegister2);
             DestReg_out.write(Intern_DestReg_out);
             label_j.write(Intern_label_j);

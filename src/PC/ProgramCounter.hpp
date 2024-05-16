@@ -22,10 +22,12 @@ SC_MODULE(ProgramCounter) {
             cout << "load" << endl;
             currentInstruction = pcInput.read();
             pcOutput.write(currentInstruction);
+           
 
         } if(enable.read()){
             currentInstruction = pcInput.read();
             pcOutput.write(currentInstruction);
+            cout << "currentInstruction" << endl;
         }
     }
     
