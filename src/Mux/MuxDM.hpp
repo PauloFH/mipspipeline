@@ -7,12 +7,14 @@ SC_MODULE(MuxDM) {
     sc_out<sc_int<32>> out; 
 
     void process() {
-        cout << "MuxDM" << endl;
+        
         if (memReg.read() == 0) {
             out.write(in0.read()); 
         } else {
             out.write(in1.read());
         }
+    cout << "MuxDM" << endl;
+    cout << "memReg: " << memReg.read() << endl;
     }
 
     SC_CTOR(MuxDM) {

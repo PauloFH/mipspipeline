@@ -97,6 +97,6 @@ SC_MODULE(Registers)
         sensitive << clk.pos();
         
         SC_METHOD(readRegistrator);
-        sensitive << readRegister1 << readRegister2;
+        sensitive << readRegister1 << readRegister2 << writeRegister << writeData << RegWrite;
     }
 };

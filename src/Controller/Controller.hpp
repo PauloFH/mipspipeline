@@ -80,14 +80,14 @@ SC_MODULE(Controller)
     }
     void ID()
     {
-        imEnable.write(false);
-        pcEnable.write(false);
+        //imEnable.write(false);
         regEnable.write(true);
         opcode = instruction.read().range(31, 28);
         label = instruction.read().range(27, 0);
         opd = instruction.read().range(27, 22);
         op1 = instruction.read().range(21, 16);
         op2 = instruction.read().range(15, 0);
+        aluOp.write(opcode);
     }
     void RE()
     {
@@ -194,8 +194,9 @@ SC_MODULE(Controller)
             else if (opcode > 0 && opcode < 9)
             { // ALU
                 aluOp.write(opcode);
-                regWrite.write(false);
+                regWrite.write(true);
                 regEnable.write(true);
+
                 state = 8;
             }
 

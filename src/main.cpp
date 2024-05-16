@@ -144,7 +144,6 @@ int sc_main(int, char*[]) {
 	sc_signal<bool> BufferEXMEM_BufferMEMWB_RegWrite;
 	sc_signal<sc_int<32>>BufferEXMEM_DataMemory_WriteData;
 	sc_signal<sc_uint<6>> BufferEXMEM_BufferMEMWB_Opdest;
-	sc_signal<sc_int<32>> BufferEXMEM_BufferMEMWB_address;
 	
 	//DataMemory
 	sc_signal<sc_int<32>> BufferEXMEM_DataMemory_Adress;
@@ -323,7 +322,7 @@ int sc_main(int, char*[]) {
 	BufferMEMWB.RegWrite(BufferEXMEM_BufferMEMWB_RegWrite);
 	BufferMEMWB.memReg(BufferEXMEM_BufferMEMWB_MemReg);
 	BufferMEMWB.opDestino(BufferEXMEM_BufferMEMWB_Opdest);
-	BufferMEMWB.dataAdress(BufferEXMEM_BufferMEMWB_address);
+	BufferMEMWB.dataAdress(BufferEXMEM_DataMemory_Adress);
 	BufferMEMWB.readData(DataMemory_BufferMEMWB_ReadData);
 	BufferMEMWB.regWriteOutput(BufferMEMWB_Registers_RegWrite);
 	BufferMEMWB.writeRegister(BufferMEMWB_Registers_writeRegister);
