@@ -183,7 +183,7 @@ SC_MODULE(Controller)
             { // beq
                 aluOp.write(opcode);
                 if (!zero.read())
-                {
+                {   
                     pcEnable.write(false);
                     pcjump.write(label);
                     aluReset.write(true);

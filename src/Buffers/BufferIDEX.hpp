@@ -39,6 +39,7 @@ SC_MODULE(BufferIDEX) {
 
     bool Intern_Branch;
     bool Intern_memToReg;
+    bool Intern_regWrite;   
     sc_uint<4> Intern_opcode;
     sc_uint<16> Intern_pc;
     sc_uint<16> Intern_label_j;
@@ -89,9 +90,11 @@ SC_MODULE(BufferIDEX) {
             aluOp_out.write(Intern_aluOp);
             dataDMout.write(Intern_dataDM);
 
+
         } else {
          if (enable.read()) {
             if (write.read()) {
+                Intern_regWrite = regWrite.read();
                 Intern_register1 = registerData1.read();
                 Intern_register2 = registerData2.read();
                 Intern_destReg = destReg.read();
@@ -121,6 +124,7 @@ SC_MODULE(BufferIDEX) {
             aluReset_out.write(Intern_aluReset);
             aluOp_out.write(Intern_aluOp);
             dataDMout.write(Intern_dataDM);
+            regWrite_Output.write(Intern_regWrite);
 
 
             }else{
@@ -138,6 +142,7 @@ SC_MODULE(BufferIDEX) {
             aluReset_out.write(Intern_aluReset);
             aluOp_out.write(Intern_aluOp);
             dataDMout.write(Intern_dataDM);
+            regWrite_Output.write(Intern_regWrite);
             }
         }
                 cout << "-----------------------------------------------------------------------" << endl;
