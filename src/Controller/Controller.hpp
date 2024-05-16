@@ -52,21 +52,20 @@ SC_MODULE(Controller)
     sc_out<bool> reset_BufferMEMWB;
     sc_out<sc_uint<4>> aluOp;
     sc_out<bool> aluReset;
-    //sc_out<sc_uint<22>> addressOut;
-    // locais
+    // sc_out<sc_uint<22>> addressOut;
+    //  locais
     sc_uint<32> label;
     sc_uint<4> opcode;
     sc_uint<6> opd;
     sc_uint<6> op1;
     sc_uint<16> op2;
-    
+
     sc_out<int> stateOut;
     int state = 0;
     bool restart;
 
-
-    
-    void IF(){
+    void IF()
+    {
         imEnable.write(true);
         imwrite.write(true);
         pcEnable.write(true);
@@ -77,8 +76,9 @@ SC_MODULE(Controller)
         write_BufferEXMEM.write(true);
         write_BufferMEMWB.write(true);
         enable_BufferMEMWB.write(true);
-        }
-    void ID(){
+    }
+    void ID()
+    {
         imEnable.write(false);
         pcEnable.write(false);
         regEnable.write(true);
@@ -87,25 +87,27 @@ SC_MODULE(Controller)
         opd = instruction.read().range(27, 22);
         op1 = instruction.read().range(21, 16);
         op2 = instruction.read().range(15, 0);
-        }
-    void RE(){
+    }
+    void RE()
+    {
         regEnable.write(true);
         regWrite.write(true);
     }
-    void updateState(){        
+    void updateState()
+    {
         stateOut.write(state);
 
         if (opcode == beq_op)
         {
             branch.write(true);
         }
-        else if(opcode == bne_op)
+        else if (opcode == bne_op)
         {
             branch.write(false);
         }
-        if(opcode == lw_op || opcode == sw_op)
+        if (opcode == lw_op || opcode == sw_op)
         {
-         //addressOut.write(instruction.read().range(21, 0));
+            // addressOut.write(instruction.read().range(21, 0));
         }
         switch (state)
         {
@@ -130,11 +132,11 @@ SC_MODULE(Controller)
 
         case 3:
 
-        ID();
-        cout << " state 3" << endl;
-        cout << "opcode: " << opcode << endl;
-        state = 4;
-        break;
+            ID();
+            cout << " state 3" << endl;
+            cout << "opcode: " << opcode << endl;
+            state = 4;
+            break;
 
         case 4:
             if (opcode == 9)
@@ -143,7 +145,7 @@ SC_MODULE(Controller)
                 regWrite.write(true);
                 dmEnable.write(true);
                 dmWrite.write(true);
-                 aluOp.write(opcode);
+                aluOp.write(opcode);
                 state = 5;
             }
             else if (opcode == 10)
@@ -209,7 +211,7 @@ SC_MODULE(Controller)
             break;
 
         case 7:
-        aluReset.write(false);
+            aluReset.write(false);
             state = 2;
             break;
 
@@ -226,10 +228,9 @@ SC_MODULE(Controller)
             sc_stop();
         default:
             break;
-
         }
         cout << "-----------------------------------------------------------------------" << endl;
-        cout << "Controller" << endl;        
+        cout << "Controller" << endl;
         cout << "clk: " << clk.read() << endl;
         cout << "instruction: " << instruction.read() << endl;
         cout << "zero: " << zero.read() << endl;
@@ -256,20 +257,19 @@ SC_MODULE(Controller)
         cout << "write_BufferEXMEM: " << write_BufferEXMEM.read() << endl;
         cout << "reset_BufferEXMEM: " << reset_BufferEXMEM.read() << endl;
         cout << "enable_BufferMEMWB: " << enable_BufferMEMWB.read() << endl;
-        cout << "write_BufferMEMWB: " << write_BufferMEMWB.read() << endl;  
+        cout << "write_BufferMEMWB: " << write_BufferMEMWB.read() << endl;
         cout << "reset_BufferMEMWB: " << reset_BufferMEMWB.read() << endl;
         cout << "aluOp: " << aluOp.read() << endl;
         cout << "aluReset: " << aluReset.read() << endl;
         cout << "stateOut: " << stateOut.read() << endl;
         cout << "state: " << state << endl;
         cout << "restart: " << restart << endl;
-    
-       cout << "-----------------------------------------------------------------------" << endl; 
 
+        cout << "-----------------------------------------------------------------------" << endl;
     }
 
     SC_CTOR(Controller)
-    { 
+    {
         SC_METHOD(updateState);
         sensitive << clk.pos();
     }
