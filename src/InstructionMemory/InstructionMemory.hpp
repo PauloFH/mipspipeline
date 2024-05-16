@@ -21,37 +21,39 @@ SC_MODULE(InstructionMemory)
         SC_CTOR(InstructionMemory)
     {
         convertAsmInInstructions();
-
+        for (size_t i = 0; i < 5; i++)
+        {
+            cout << "memory[" << i << "] = " << memory[i] << endl;
+        }
+        
         SC_THREAD(fetchInstruction);
         sensitive << clk.pos();
     }
+
     void fetchInstruction()
-
     {   
-
         while (true)
         {
             wait();
             if (enable.read())
             {
-                if (write.read())
-                {
-                    memory[address.read()] = instruction.read();
-                }
+
                 instruction.write(memory[address.read()]);
             }
             if(memory[address.read()] == 0b0){
                 sc_stop();
             }
-        }
-        cout << "-----------------------------------------------------------------------" << endl;
-        cout << "Instruction Memory" << endl
+                cout << "-----------------------------------------------------------------------" << endl;
+                cout << "Instruction Memory" << endl
                 << "clk: " << clk.read() << endl
                 << "enable: " << enable.read() << endl
                 << "write: " << write.read() << endl
-                << "address: " << address.read() << endl;
+                << "address: " << address.read() << endl
+                << "instruction: " << instruction.read() << endl;
         cout << "-----------------------------------------------------------------------" << endl;
         
+        }
+
     }
 
 public:
@@ -117,8 +119,7 @@ public:
                 if (line.size() >= 1)
                 {
                     ct = ct + 0b0000000000000001;
-                    if (line.find(":"))
-                    {
+                    if (line.find(':') != string::npos){
                         line = line.substr(0, line.size() - 1);
                         jumpLocations.insert({line, ct});
                     }

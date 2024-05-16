@@ -30,9 +30,8 @@ SC_MODULE(ProgramCounter) {
     }
     
     SC_CTOR(ProgramCounter) {
-       currentInstruction = 1; 
+       currentInstruction = 0; 
         SC_METHOD(counterIntruction);
         sensitive << clk.pos();
-        sensitive << reset;
     }
 };

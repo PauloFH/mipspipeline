@@ -8,8 +8,7 @@ SC_MODULE(Addr){
     void addr(){
        
         output_value.write(first_value.read() + 1);
-         cout << "Passa Instrução" << endl;
-
+         cout << "novo endereço de instrução" << output_value << endl;
     }
 
     SC_CTOR(Addr){

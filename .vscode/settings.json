@@ -70,5 +70,6 @@
         "bitset": "cpp",
         "*.inc": "cpp"
     },
-    "discord.enabled": true
+    "discord.enabled": true,
+    "cmake.configureOnOpen": false
 }

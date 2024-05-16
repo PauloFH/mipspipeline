@@ -337,11 +337,11 @@ int sc_main(int, char*[]) {
 	MuxDM.out(MUXDM_Registers_writeData);
 
 //-----------------------------------------------------------------------------------------------
-for (int i = 0; i < 5; i++) {
+for (int i = 0; i < 50; i++) {
 		clk = 1;
-		sc_start(1, SC_NS);
+		sc_start(10, SC_NS);
 		clk = 0;
-		sc_start(1, SC_NS);
+		sc_start(10, SC_NS);
 	}
 	
 

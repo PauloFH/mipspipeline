@@ -66,8 +66,7 @@ SC_MODULE(Controller)
 
 
     
-    void IF()
-    {
+    void IF(){
         imEnable.write(true);
         imwrite.write(true);
         pcEnable.write(true);
@@ -78,9 +77,8 @@ SC_MODULE(Controller)
         write_BufferEXMEM.write(true);
         write_BufferMEMWB.write(true);
         enable_BufferMEMWB.write(true);
-    }
-    void ID()
-    {
+        }
+    void ID(){
         imEnable.write(false);
         pcEnable.write(false);
         regEnable.write(true);
@@ -89,14 +87,13 @@ SC_MODULE(Controller)
         opd = instruction.read().range(27, 22);
         op1 = instruction.read().range(21, 16);
         op2 = instruction.read().range(15, 0);
-    }
-    void RE()
-    {
+        }
+    void RE(){
         regEnable.write(true);
         regWrite.write(true);
     }
-    void updateState()
-    {        stateOut.write(state);
+    void updateState(){        
+        stateOut.write(state);
 
         if (opcode == beq_op)
         {
@@ -108,16 +105,15 @@ SC_MODULE(Controller)
         }
         if(opcode == lw_op || opcode == sw_op)
         {
-              //addressOut.write(instruction.read().range(21, 0));
+         //addressOut.write(instruction.read().range(21, 0));
         }
         switch (state)
         {
         case 0:
             IF();
             state = 1;
-                        cout << "state 0" << endl;
+            cout << "state 0" << endl;
             break;
-
         case 1:
             ID();
             state = 2;
@@ -135,6 +131,7 @@ SC_MODULE(Controller)
         case 3:
 
         ID();
+        cout << " state 3" << endl;
         cout << "opcode: " << opcode << endl;
         state = 4;
         break;
@@ -229,6 +226,7 @@ SC_MODULE(Controller)
             sc_stop();
         default:
             break;
+
         }
         cout << "-----------------------------------------------------------------------" << endl;
         cout << "Controller" << endl;        
@@ -236,12 +234,42 @@ SC_MODULE(Controller)
         cout << "instruction: " << instruction.read() << endl;
         cout << "zero: " << zero.read() << endl;
         cout << "reset: " << reset.read() << endl;
+        cout << "pcReset: " << pcReset.read() << endl;
+        cout << "pcEnable: " << pcEnable.read() << endl;
+        cout << "PcLoad: " << PcLoad.read() << endl;
+        cout << "pcjump: " << pcjump.read() << endl;
+        cout << "regEnable: " << regEnable.read() << endl;
+        cout << "regWrite: " << regWrite.read() << endl;
+        cout << "imEnable: " << imEnable.read() << endl;
+        cout << "imwrite: " << imwrite.read() << endl;
+        cout << "dmEnable: " << dmEnable.read() << endl;
+        cout << "dmWrite: " << dmWrite.read() << endl;
+        cout << "memToReg: " << memToReg.read() << endl;
+        cout << "enable_BufferIFID: " << enable_BufferIFID.read() << endl;
+        cout << "write_BufferIFID: " << write_BufferIFID.read() << endl;
+        cout << "reset_BufferIFID: " << reset_BufferIFID.read() << endl;
+        cout << "enable_BufferIDEX: " << enable_BufferIDEX.read() << endl;
+        cout << "write_BufferIDEX: " << write_BufferIDEX.read() << endl;
+        cout << "reset_BufferIDEX: " << reset_BufferIDEX.read() << endl;
+        cout << "branch: " << branch.read() << endl;
+        cout << "enable_BufferEXMEM: " << enable_BufferEXMEM.read() << endl;
+        cout << "write_BufferEXMEM: " << write_BufferEXMEM.read() << endl;
+        cout << "reset_BufferEXMEM: " << reset_BufferEXMEM.read() << endl;
+        cout << "enable_BufferMEMWB: " << enable_BufferMEMWB.read() << endl;
+        cout << "write_BufferMEMWB: " << write_BufferMEMWB.read() << endl;  
+        cout << "reset_BufferMEMWB: " << reset_BufferMEMWB.read() << endl;
+        cout << "aluOp: " << aluOp.read() << endl;
+        cout << "aluReset: " << aluReset.read() << endl;
+        cout << "stateOut: " << stateOut.read() << endl;
+        cout << "state: " << state << endl;
+        cout << "restart: " << restart << endl;
+    
        cout << "-----------------------------------------------------------------------" << endl; 
 
     }
 
     SC_CTOR(Controller)
-    {
+    { 
         SC_METHOD(updateState);
         sensitive << clk.pos();
     }
